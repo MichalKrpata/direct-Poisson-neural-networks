@@ -28,11 +28,12 @@ def update_args_init(args):
     The function `update_args_init` generates random initial conditions for a given set of arguments,
     ensuring that the generated values are within a certain range.
     
-    :param args: The `args` parameter is an object of type `argparse.Namespace` that contains various
-    attributes representing the initial conditions for a simulation. These attributes include:
-    :return: an updated version of the `args` object with randomly generated initial conditions for
-    `init_mx`, `init_my`, `init_mz`, `init_rx`, `init_ry`, and `init_rz`.
+    :param args: The `args` parameter is an object of type `argparse.Namespace` that contains various attributes representing the initial conditions for a simulation. These attributes include:
+
+    :return: an updated version of the `args` object with randomly generated initial conditions for `init_mx`, `init_my`, `init_mz`, `init_rx`, `init_ry`, and `init_rz`.
+
     """
+
     #generates random initial conditions (uniformly on the ball with radius as in the original args)
     sqm = args.init_mx**2 + args.init_my**2 + args.init_mz**2 #square magnitude of m
     m = math.sqrt(sqm) #magnitude of m
@@ -68,11 +69,8 @@ def simulate_normal(args):
     The function `simulate_normal` calls the `simulate` function with the method parameter set to
     "normal".
     
-    :param args: The `args` parameter is a dictionary that contains the necessary arguments for the
-    simulation. The specific contents of the `args` dictionary will depend on the requirements of the
-    `simulate` function
-    :return: The function `simulate_normal` is returning the result of calling the `simulate` function
-    with the given arguments and the method set to "normal".
+    :param args: The `args` parameter is a dictionary that contains the necessary arguments for the simulation. The specific contents of the `args` dictionary will depend on the requirements of the `simulate` function
+    :return: The function `simulate_normal` is returning the result of calling the `simulate` function with the given arguments and the method set to "normal".
     """
     return simulate.simulate(args, method = "normal") 
 
@@ -81,24 +79,17 @@ def simulate_implicit(args):
     The function `simulate_implicit` calls the `simulate` function with the method parameter set to
     "implicit".
     
-    :param args: The `args` parameter is a dictionary that contains the necessary arguments for the
-    simulation. The specific contents of the `args` dictionary will depend on the requirements of the
-    `simulate` function
-    :return: The function `simulate_implicit` is returning the result of calling the `simulate` function
-    with the given arguments and the method set to "implicit".
+    :param args: The `args` parameter is a dictionary that contains the necessary arguments for the simulation. The specific contents of the `args` dictionary will depend on the requirements of the `simulate` function
+    :return: The function `simulate_implicit` is returning the result of calling the `simulate` function with the given arguments and the method set to "implicit".
     """
     return simulate.simulate(args, method = "implicit") 
 
 def simulate_without(args):
     """
-    The function "simulate_without" calls the "simulate" function with the argument "method" set to
-    "without".
+    The function "simulate_without" calls the "simulate" function with the argument "method" set to "without".
     
-    :param args: The `args` parameter is a placeholder for any additional arguments that need to be
-    passed to the `simulate` function. These arguments can vary depending on the specific requirements
-    of the `simulate` function
-    :return: The function `simulate_without` is returning the result of calling the `simulate` function
-    with the provided arguments and the method set to "without".
+    :param args: The `args` parameter is a placeholder for any additional arguments that need to be passed to the `simulate` function. These arguments can vary depending on the specific requirements of the `simulate` function
+    :return: The function `simulate_without` is returning the result of calling the `simulate` function with the provided arguments and the method set to "without".
     """
     return simulate.simulate(args, method = "without") 
 
@@ -106,22 +97,16 @@ def simulate_soft(args):
     """
     The function `simulate_soft` calls the `simulate` function with the argument `method` set to "soft".
     
-    :param args: The `args` parameter is a dictionary or a list of arguments that will be passed to the
-    `simulate` function. The specific arguments required will depend on the implementation of the
-    `simulate` function
-    :return: The function `simulate_soft` is returning the result of calling the `simulate` function
-    with the given arguments and the method set to "soft".
+    :param args: The `args` parameter is a dictionary or a list of arguments that will be passed to the `simulate` function. The specific arguments required will depend on the implementation of the `simulate` function
+    :return: The function `simulate_soft` is returning the result of calling the `simulate` function with the given arguments and the method set to "soft".
     """
     return simulate.simulate(args, method = "soft") 
 
 def generate_trajectories(args):
     """
-    The function `generate_trajectories` generates and saves trajectories based on the given arguments,
-    either using a deterministic approach or simulating with learned models.
+    The function `generate_trajectories` generates and saves trajectories based on the given arguments, either using a deterministic approach or simulating with learned models.
     
-    :param args: The `args` parameter is a dictionary or object that contains various arguments or
-    parameters for the `generate_trajectories` function. These arguments control the behavior of the
-    function and determine what kind of trajectories are generated or simulated
+    :param args: The `args` parameter is a dictionary or object that contains various arguments or parameters for the `generate_trajectories` function. These arguments control the behavior of the function and determine what kind of trajectories are generated or simulated
     """
     if args.generate:
         print("Generating dataset.")
@@ -216,17 +201,12 @@ def generate_trajectories(args):
 
 def add_plot(ax, x=None,y=None, name=""):
     """
-    The function `add_plot` adds a line plot to a given matplotlib axes object, with the option to
-    specify x and y data and a label for the plot.
+    The function `add_plot` adds a line plot to a given matplotlib axes object, with the option to specify x and y data and a label for the plot.
     
-    :param ax: The `ax` parameter is a matplotlib Axes object. It represents the subplot or axes on
-    which the plot will be drawn
-    :param x: The x-axis values for the plot. If provided, the plot will be a line plot with x and y
-    values. If not provided, the plot will be a line plot with only y values
-    :param y: The `y` parameter is a list or array of values that represent the y-coordinates of the
-    data points to be plotted
-    :param name: The name parameter is a string that represents the label for the plot. It is used to
-    identify the plot in the legend of the graph
+    :param ax: The `ax` parameter is a matplotlib Axes object. It represents the subplot or axes on which the plot will be drawn
+    :param x: The x-axis values for the plot. If provided, the plot will be a line plot with x and y values. If not provided, the plot will be a line plot with only y values
+    :param y: The `y` parameter is a list or array of values that represent the y-coordinates of the data points to be plotted
+    :param name: The name parameter is a string that represents the label for the plot. It is used to identify the plot in the legend of the graph
     """
     #ax.scatter(x[::args.plot_every],y[::args.plot_every])
     if x is not None:
@@ -236,8 +216,7 @@ def add_plot(ax, x=None,y=None, name=""):
 
 def plot_training_errors(args):
     """
-    The function `plot_training_errors` reads error data from CSV files and plots the training and
-    validation errors for different scenarios.
+    The function `plot_training_errors` reads error data from CSV files and plots the training and validation errors for different scenarios.
     
     :param args: The `args` parameter is an object that contains the following attributes:
     """
