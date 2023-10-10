@@ -34,3 +34,7 @@ Then choose a different initial conditions and see how well our network fits the
     python3 plot_compare.py --plot_m --plot_E --plot_L
 
 Check training error and errors while learning. 
+
+## Typical arguments used for the training can be found in folder 
+
+    typical_args
