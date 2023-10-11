@@ -38,24 +38,14 @@ class Learner(object):
         This function initializes a Learner object for a given model, with specified parameters and
         datasets.
         
-        :param model: The "model" parameter specifies the type of model being used. It can take the
-        following values:
-        :param batch_size: The batch size is the number of samples that will be propagated through the
-        neural network at once. It is used to control the number of samples processed in each iteration
-        during training
-        :param dt: The parameter "dt" represents the time step size used in the model. It determines the
-        interval at which the model updates its internal state and makes predictions
-        :param neurons: The "neurons" parameter represents the number of neurons in each hidden layer of
-        the neural network models used in the code
-        :param layers: The "layers" parameter specifies the number of layers in the neural network
-        models used in the code. It determines the depth of the network and affects the complexity and
-        capacity of the model
+        :param model: The "model" parameter specifies the type of model being used. It can take the following values:
+        :param batch_size: The batch size is the number of samples that will be propagated through the neural network at once. It is used to control the number of samples processed in each iteration during training
+        :param dt: The parameter "dt" represents the time step size used in the model. It determines the interval at which the model updates its internal state and makes predictions
+        :param neurons: The "neurons" parameter represents the number of neurons in each hidden layer of the neural network models used in the code
+        :param layers: The "layers" parameter specifies the number of layers in the neural network models used in the code. It determines the depth of the network and affects the complexity and capacity of the model
         :param name: The name parameter is used to specify the folder name where the dataset is located
-        :param cuda: A boolean value indicating whether to use CUDA for GPU acceleration. If set to
-        True, the model will be moved to the GPU device, defaults to False (optional)
-        :param dissipative: A boolean parameter indicating whether the model is dissipative or not. If
-        dissipative is set to True, it means that the model includes dissipative dynamics, defaults to
-        False (NOT YET IMPLEMENTED)
+        :param cuda: A boolean value indicating whether to use CUDA for GPU acceleration. If set to True, the model will be moved to the GPU device, defaults to False (optional)
+        :param dissipative: A boolean parameter indicating whether the model is dissipative or not. If dissipative is set to True, it means that the model includes dissipative dynamics, defaults to False (NOT YET IMPLEMENTED)
         """
         self.model = model
         dim = 0
@@ -124,16 +114,10 @@ class Learner(object):
         """
         The function calculates the movement loss using the "without" method.
         
-        :param zn_tensor: The `zn_tensor` parameter represents the current state of the system. It is a
-        tensor that contains the values of the variables in the system at a particular time
-        :param zn2_tensor: The parameter `zn2_tensor` is a tensor representing the current state of the
-        system at time `t+dt`. It is used to calculate the loss function for the movement of the system
-        without considering any external forces or constraints
-        :param mid_tensor: The `mid_tensor` parameter is not used in the `mov_loss_without` function. It
-        is not necessary for the calculation and can be removed from the function signature
-        :return: the result of the expression `(zn_tensor - zn2_tensor)/self.dt +
-        1.0/2.0*(torch.matmul(Lz, E_z.unsqueeze(2)).squeeze() + torch.matmul(Lz2,
-        E_z2.unsqueeze(2)).squeeze())`.
+        :param zn_tensor: The `zn_tensor` parameter represents the current state of the system. It is a tensor that contains the values of the variables in the system at a particular time
+        :param zn2_tensor: The parameter `zn2_tensor` is a tensor representing the current state of the system at time `t+dt`. It is used to calculate the loss function for the movement of the system without considering any external forces or constraints
+        :param mid_tensor: The `mid_tensor` parameter is not used in the `mov_loss_without` function. It is not necessary for the calculation and can be removed from the function signature
+        :return: the result of the expression `(zn_tensor - zn2_tensor)/self.dt + 1.0/2.0*(torch.matmul(Lz, E_z.unsqueeze(2)).squeeze() + torch.matmul(Lz2, E_z2.unsqueeze(2)).squeeze())`.
         """
         En = self.energy(zn_tensor)
         En2 = self.energy(zn2_tensor)
@@ -150,20 +134,11 @@ class Learner(object):
         """
         The function calculates the movement loss including Jacobi identity the for a given input tensor.
         
-        :param zn_tensor: The zn_tensor is a tensor representing the current state of the system. It is
-        used to calculate the energy and the Jacobian loss of the system
-        :param zn2_tensor: The `zn2_tensor` parameter is a tensor representing the state at time `t+1`.
-        It is used to calculate the loss for the movement of the system without using the Jacobian
-        matrix
-        :param mid_tensor: The `mid_tensor` parameter is a tensor representing the intermediate state
-        between `zn_tensor` and `zn2_tensor`. It is used to calculate the loss function
-        :param reduced_L: The parameter "reduced_L" is a reduced Laplacian matrix. It is used in the
-        calculation of the Jacobi loss
-        :return: two values: 
-        1. The difference between `zn_tensor` and `zn2_tensor` divided by `self.dt` plus half of the sum
-        of the matrix multiplication of `Lz` and `E_z` and the matrix multiplication of `Lz2` and
-        `E_z2`. 
-        2. The `jacobi_loss` calculated using `zn_tensor`, `
+        :param zn_tensor: The zn_tensor is a tensor representing the current state of the system. It is used to calculate the energy and the Jacobian loss of the system
+        :param zn2_tensor: The `zn2_tensor` parameter is a tensor representing the state at time `t+1`. It is used to calculate the loss for the movement of the system without using the Jacobian matrix
+        :param mid_tensor: The `mid_tensor` parameter is a tensor representing the intermediate state between `zn_tensor` and `zn2_tensor`. It is used to calculate the loss function
+        :param reduced_L: The parameter "reduced_L" is a reduced Laplacian matrix. It is used in the calculation of the Jacobi loss
+        :return: two values: \\ 1. The difference between `zn_tensor` and `zn2_tensor` divided by `self.dt` plus half of the sum of the matrix multiplication of `Lz` and `E_z` and the matrix multiplication of `Lz2` and `E_z2`. \\ 2. The `jacobi_loss` calculated using `zn_tensor`, `
         """
         En = self.energy(zn_tensor)
         En2 = self.energy(zn2_tensor)
@@ -183,10 +158,8 @@ class Learner(object):
         """
         The function `jacobi_loss` calculates the Jacobi loss (error in Jacobi identity) using the given inputs.
         
-        :param zn_tensor: The `zn_tensor` parameter is a tensor representing the input to the function. It
-        is used to compute the Jacobian loss
-        :param Lz: Lz is a tensor representing the Jacobian matrix of the output with respect to the input.
-        It has shape (m, n, n), where m is the number of samples and n is the number of input variables
+        :param zn_tensor: The `zn_tensor` parameter is a tensor representing the input to the function. It is used to compute the Jacobian loss.
+        :param Lz: Lz is a tensor representing the Jacobian matrix of the output with respect to the input. It has shape (m, n, n), where m is the number of samples and n is the number of input variables.
         :param reduced_L: The parameter `reduced_L` is a tensor representing the reduced loss function
         :return: the sum of three terms: term1, term2, and term3.
         """
@@ -200,12 +173,9 @@ class Learner(object):
         """
         The function `mov_loss_soft` calculates the movement loss and Jacobi loss for a given input tensor, using the "soft" method.
         
-        :param zn_tensor: The zn_tensor is a tensor representing the current state of the system. It is used
-        to calculate the energy and gradient of the energy with respect to zn_tensor
-        :param zn2_tensor: The `zn2_tensor` parameter is a tensor representing the state at time `t+1`. It
-        is used to calculate the movement loss and Jacobi loss in the `mov_loss_soft` function
-        :param mid_tensor: The `mid_tensor` parameter is not used in the `mov_loss_soft` function. It is not
-        clear what its purpose is without further context
+        :param zn_tensor: The zn_tensor is a tensor representing the current state of the system. It is used to calculate the energy and gradient of the energy with respect to zn_tensor
+        :param zn2_tensor: The `zn2_tensor` parameter is a tensor representing the state at time `t+1`. It is used to calculate the movement loss and Jacobi loss in the `mov_loss_soft` function
+        :param mid_tensor: The `mid_tensor` parameter is not used in the `mov_loss_soft` function. It is not clear what its purpose is without further context.
         :param reduced_L: The parameter "reduced_L" is a tensor representing the reduced Laplacian matrix
         :return: two values: `mov_loss` and `jacobi_loss`.
         """
@@ -228,14 +198,10 @@ class Learner(object):
         """
         The function `mov_loss_implicit` calculates the loss for a motion model using the "implicit" method.
         
-        :param zn_tensor: The `zn_tensor` parameter is a tensor representing the current state of the
-        system. It is used to calculate the energy and Jacobian vectors for the system
-        :param zn2_tensor: The `zn2_tensor` parameter is a tensor representing the state of the system at
-        time `t + dt`, where `t` is the current time and `dt` is the time step
-        :param mid_tensor: The `mid_tensor` parameter is not used in the `mov_loss_implicit` function. It is
-        not necessary for the calculation and can be removed from the function signature
-        :return: The function `mov_loss_implicit` returns the result of the expression `(zn_tensor -
-        zn2_tensor)/self.dt + 1.0/2.0*(torch.cross(Jz, E_z, dim=1) + torch.cross(Jz2, E_z2, dim=1))`.
+        :param zn_tensor: The `zn_tensor` parameter is a tensor representing the current state of the system. It is used to calculate the energy and Jacobian vectors for the system.
+        :param zn2_tensor: The `zn2_tensor` parameter is a tensor representing the state of the system at time `t + dt`, where `t` is the current time and `dt` is the time step.
+        :param mid_tensor: The `mid_tensor` parameter is not used in the `mov_loss_implicit` function. It is not necessary for the calculation and can be removed from the function signature.
+        :return: The function `mov_loss_implicit` returns the result of the expression `(zn_tensor - zn2_tensor)/self.dt + 1.0/2.0*(torch.cross(Jz, E_z, dim=1) + torch.cross(Jz2, E_z2, dim=1))`.
         """
         En = self.energy(zn_tensor)
         En2 = self.energy(zn2_tensor)
@@ -252,23 +218,12 @@ class Learner(object):
         The `learn` function is used to train a model using different methods and parameters, and it saves
         the trained models and error metrics.
         
-        :param method: The method parameter determines the learning method to be used. It can take one of
-        three values: "without", "soft", or "implicit", defaults to without (optional)
-        :param learning_rate: The learning rate determines the step size at which the optimizer adjusts the
-        model's parameters during training. It controls how quickly or slowly the model learns from the
-        training data
-        :param epochs: The "epochs" parameter determines the number of times the model will iterate over the
-        entire training dataset during the learning process. Each iteration is called an epoch
-        :param prefactor: The `prefactor` parameter is a scaling factor that is applied to the movement loss
-        during training. It allows you to control the relative importance of the movement loss compared to
-        other losses or metrics. By adjusting the value of `prefactor`, you can increase or decrease the
-        impact of the movement loss on
-        :param jac_prefactor: The `jac_prefactor` parameter is used as a scaling factor for the
-        regularization term in the loss function. It determines the relative importance of the
-        regularization term compared to the movement term in the loss function. A higher value of
-        `jac_prefactor` will give more weight to the regularization term, while
-        :param scheme: The "scheme" parameter is a string that specifies the numerical scheme used for
-        solving the equations. It can take one of the following values:, defaults to IMR (optional)
+        :param method: The method parameter determines the learning method to be used. It can take one of three values: "without", "soft", or "implicit", defaults to without (optional)
+        :param learning_rate: The learning rate determines the step size at which the optimizer adjusts the model's parameters during training. It controls how quickly or slowly the model learns from the training data
+        :param epochs: The "epochs" parameter determines the number of times the model will iterate over the entire training dataset during the learning process. Each iteration is called an epoch
+        :param prefactor: The `prefactor` parameter is a scaling factor that is applied to the movement loss during training. It allows you to control the relative importance of the movement loss compared to other losses or metrics. By adjusting the value of `prefactor`, you can increase or decrease the impact of the movement loss on
+        :param jac_prefactor: The `jac_prefactor` parameter is used as a scaling factor for the regularization term in the loss function. It determines the relative importance of the regularization term compared to the movement term in the loss function. A higher value of `jac_prefactor` will give more weight to the regularization term, while
+        :param scheme: The "scheme" parameter is a string that specifies the numerical scheme used for solving the equations. It can take one of the following values:, defaults to IMR (optional)
         """
         if method not in ["without", "soft", "implicit"]:
             raise Exception("Unknown method "+method)
@@ -421,9 +376,7 @@ class LearnerIMR(Learner):
         
         :param zn_tensor: The `zn_tensor` parameter is a tensor representing the current state of the system
         :param zn2_tensor: The `zn2_tensor` parameter is a tensor representing the state at time `t-2*dt`
-        :param mid_tensor: The `mid_tensor` parameter is a tensor representing the intermediate state of the
-        system. It is used to compute various quantities such as energy (`En`), and the
-        gradient of energy (`E_z`) with respect to `mid_tensor`. These quantities
+        :param mid_tensor: The `mid_tensor` parameter is a tensor representing the intermediate state of the system. It is used to compute various quantities such as energy (`En`), and the gradient of energy (`E_z`) with respect to `mid_tensor`. These quantities
         :return: returns `(zn_tensor - zn2_tensor)/self.dt + ham`.
         """
         En = self.energy(mid_tensor)
@@ -436,15 +389,10 @@ class LearnerIMR(Learner):
         """
         The function calculates the moving loss and Jacobi loss for given tensors.
         
-        :param zn_tensor: The zn_tensor is a tensor representing the current state of the system. It is
-        used as input to calculate the mov_loss and jacobi_loss
-        :param zn2_tensor: The `zn2_tensor` parameter is a tensor representing the second frame of a
-        video sequence
-        :param mid_tensor: The `mid_tensor` parameter is a tensor that represents the intermediate state
-        of the model during training. It is typically used to calculate losses or perform other
-        operations
-        :param reduced_L: The parameter "reduced_L" is a reduced version of the L tensor. It is used in
-        the calculation of the Jacobi loss
+        :param zn_tensor: The zn_tensor is a tensor representing the current state of the system. It is used as input to calculate the mov_loss and jacobi_loss
+        :param zn2_tensor: The `zn2_tensor` parameter is a tensor representing the second frame of a video sequence
+        :param mid_tensor: The `mid_tensor` parameter is a tensor that represents the intermediate state of the model during training. It is typically used to calculate losses or perform other operations
+        :param reduced_L: The parameter "reduced_L" is a reduced version of the L tensor. It is used in the calculation of the Jacobi loss
         :return: two values: mov_loss and jacobi_loss.
         """
         mov_loss = self.mov_loss_without(zn_tensor, zn2_tensor, mid_tensor)
@@ -456,15 +404,10 @@ class LearnerIMR(Learner):
         """
         The function calculates the moving loss and Jacobi loss for a given set of tensors.
         
-        :param zn_tensor: The zn_tensor is a tensor representing the first set of input data for the
-        mov_loss_soft function
-        :param zn2_tensor: The `zn2_tensor` parameter is a tensor representing the second
-        zero-normalized tensor
-        :param mid_tensor: The `mid_tensor` parameter is a tensor that represents the intermediate
-        output of a neural network model. It is used as input to calculate the moving loss and Jacobi
-        loss
-        :param reduced_L: The parameter "reduced_L" is a reduced version of the L tensor. It is used in
-        the calculation of the Jacobi loss
+        :param zn_tensor: The zn_tensor is a tensor representing the first set of input data for the mov_loss_soft function
+        :param zn2_tensor: The `zn2_tensor` parameter is a tensor representing the second zero-normalized tensor
+        :param mid_tensor: The `mid_tensor` parameter is a tensor that represents the intermediate output of a neural network model. It is used as input to calculate the moving loss and Jacobi loss
+        :param reduced_L: The parameter "reduced_L" is a reduced version of the L tensor. It is used in the calculation of the Jacobi loss
         :return: two values: mov_loss and jacobi_loss.
         """
         mov_loss = self.mov_loss_without(zn_tensor, zn2_tensor, mid_tensor)
@@ -477,13 +420,10 @@ class LearnerIMR(Learner):
         """
         The function calculates the implicit loss for a given input tensor.
         
-        :param zn_tensor: The `zn_tensor` parameter represents the current state of the system at time
-        `n`
+        :param zn_tensor: The `zn_tensor` parameter represents the current state of the system at time `n`
         :param zn2_tensor: The `zn2_tensor` parameter is a tensor representing the state at time `t - dt`
-        :param mid_tensor: The `mid_tensor` parameter represents the input tensor for which the energy
-        and Jacobian vectors are calculated
-        :return: the result of the expression `(zn_tensor - zn2_tensor)/self.dt + torch.cross(Jz, E_z,
-        dim=1)`.
+        :param mid_tensor: The `mid_tensor` parameter represents the input tensor for which the energy and Jacobian vectors are calculated
+        :return: the result of the expression `(zn_tensor - zn2_tensor)/self.dt + torch.cross(Jz, E_z, dim=1)`.
         """
         if self.dissipative:
             raise Exception("Not yet implemented")
@@ -500,8 +440,7 @@ def check_folder(name):
     The function `check_folder` checks if the specified folder exists, and if not, creates it along with
     two subfolders named "data" and "saved_models".
     
-    :param name: The `name` parameter is the name of the folder that you want to check and create if it
-    doesn't exist
+    :param name: The `name` parameter is the name of the folder that you want to check and create if it doesn't exist
     """
     print("Checking folder ", name)
     name = os.getcwd()+"/"+name

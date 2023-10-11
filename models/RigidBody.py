@@ -15,25 +15,17 @@ class RigidBody(object): #Parent Rigid body class
         The above function is the initialization function for a class that represents a physical system,
         setting up various parameters and variables.
         
-        :param Ix: Ix is the moment of inertia about the x-axis. It represents the resistance of an
-        object to changes in its rotational motion about the x-axis
-        :param Iy: Iy is the moment of inertia about the y-axis. It represents the resistance of an
-        object to changes in its rotational motion about the y-axis
-        :param Iz: Iz is the moment of inertia around the z-axis. It represents the resistance of an
-        object to changes in its rotational motion around the z-axis
+        :param Ix: Ix is the moment of inertia about the x-axis. It represents the resistance of an object to changes in its rotational motion about the x-axis
+        :param Iy: Iy is the moment of inertia about the y-axis. It represents the resistance of an object to changes in its rotational motion about the y-axis
+        :param Iz: Iz is the moment of inertia around the z-axis. It represents the resistance of an object to changes in its rotational motion around the z-axis
         :param d2E: The parameter `d2E` is the Hessian of energy.
         :param mx: The parameter `mx` represents the x-component of the angular momentum
-        :param my: The parameter `my` represents the moment of inertia about the y-axis. It is used in
-        the calculations for the rotational dynamics of the system
+        :param my: The parameter `my` represents the moment of inertia about the y-axis. It is used in the calculations for the rotational dynamics of the system
         :param mz: The parameter `mz` represents the angular momentum in the z-direction
-        :param dt: The parameter "dt" represents the time step size for the simulation. It determines how
-        much time elapses between each iteration of the simulation
+        :param dt: The parameter "dt" represents the time step size for the simulation. It determines how much time elapses between each iteration of the simulation
         :param alpha: The parameter "alpha" represents damping. 
         :param T: T is the temperature in Kelvin, defaults to 100 (optional)
-        :param verbose: The `verbose` parameter is a boolean flag that determines whether or not to print
-        out additional information during the initialization of the object. If `verbose` is set to
-        `True`, then additional information will be printed. If `verbose` is set to `False`, then no
-        additional information will be printed, defaults to False (optional)
+        :param verbose: The `verbose` parameter is a boolean flag that determines whether or not to print out additional information during the initialization of the object. If `verbose` is set to `True`, then additional information will be printed. If `verbose` is set to `False`, then no additional information will be printed, defaults to False (optional)
         """
         self.Ix = Ix
         self.Iy = Iy
@@ -82,8 +74,7 @@ class RigidBody(object): #Parent Rigid body class
     def energy_x(self):
         """
         The function calculates the energy of an object in the x-direction.
-        :return: the value of 0.5 times the square of the variable self.mx, divided by the variable
-        self.Ix.
+        :return: the value of 0.5 times the square of the variable self.mx, divided by the variable self.Ix.
         """
         return 0.5*self.mx*self.mx/self.Ix
 
@@ -103,8 +94,7 @@ class RigidBody(object): #Parent Rigid body class
 
     def energy(self):#returns kinetic energy
         """
-        The function calculates the kinetic energy of an object based on its mass and moments of
-        inertia.
+        The function calculates the kinetic energy of an object based on its mass and moments of inertia.
         :return: the kinetic energy of the object.
         """
         return 0.5*(self.mx*self.mx/self.Ix+self.my*self.my/self.Iy+self.mz*self.mz/self.Iz)
@@ -176,28 +166,24 @@ class RigidBody(object): #Parent Rigid body class
     def Ein_s(self): #returns normalized derivative of internal energy with respect to entropy (inverse temperature)
         """
         The function returns the normalized derivative of internal energy with respect to entropy.
-        :return: the normalized derivative of internal energy with respect to entropy (inverse
-        temperature).
+        :return: the normalized derivative of internal energy with respect to entropy (inverse temperature).
         """
         #return 2*exp(2*(self.sin-1))/self.Iz
         return self.Einconst*4.0/3*pow(self.sin, 1.0/3) / self.Ein_init
 
     def ST(self, T): #returns entropy of a Copper body with characteristic volume equal to one (Debye), [T] = K
         """
-        The function calculates the entropy of a Copper body with a characteristic volume equal to one
-        (Debye) at a given temperature.
+        The function calculates the entropy of a Copper body with a characteristic volume equal to one (Debye) at a given temperature.
         
         :param T: T is the temperature of the Copper body in Kelvin (K)
-        :return: the entropy of a Copper body with a characteristic volume equal to one (Debye) at a
-        given temperature T.
+        :return: the entropy of a Copper body with a characteristic volume equal to one (Debye) at a given temperature T.
         """
         return 2 * pi**2/15 * self.kB * (self.kB/self.hbar *T/self.umean)**3
 
     def Etot(self):#returns normalized total energy
         """
         The function `Etot` returns the sum of the energy and the input energy.
-        :return: the sum of the energy and the input energy, both of which are being calculated by other
-        methods.
+        :return: the sum of the energy and the input energy, both of which are being calculated by other methods.
         """
         return self.energy() + self.Ein()
 
@@ -244,8 +230,7 @@ class RigidBody(object): #Parent Rigid body class
         The function `get_L` returns a 3x3 matrix `L` (Poisson bivector) based on the input parameter `m`.
         
         :param m: The parameter "m" is a scalar value
-        :return: The function `get_L` returns a 3x3 numpy array `L` which is calculated using the values of
-        `self.mx`, `self.my`, and `self.mz`.
+        :return: The function `get_L` returns a 3x3 numpy array `L` which is calculated using the values of `self.mx`, `self.my`, and `self.mz`.
         """
         L = -1*np.array([[0.0, self.mz, -self.my],[-self.mz, 0.0, self.mx],[self.my, -self.mx, 0.0]])
         return L
@@ -254,10 +239,8 @@ class RigidBody(object): #Parent Rigid body class
         """
         The function "get_E" returns the energy of an object.
         
-        :param m: The parameter "m" is not used in the code snippet provided. It is not clear what it
-        represents or how it is related to the function
-        :return: The method `get_E` is returning the result of the method `energy()` called on the object
-        `self`.
+        :param m: The parameter "m" is not used in the code snippet provided. It is not clear what it represents or how it is related to the function
+        :return: The method `get_E` is returning the result of the method `energy()` called on the object `self`.
         """
         return self.energy()
 
@@ -270,14 +253,11 @@ class RBEhrenfest(RigidBody):#Ehrenfest scheme for the rigid body, Eq. 5.25a fro
         :param Ix: The parameter Ix represents the moment of inertia about the x-axis
         :param Iy: The parameter Iy represents the moment of inertia about the y-axis
         :param Iz: The parameter "Iz" represents the moment of inertia about the z-axis
-        :param d2E: The parameter "d2E" likely represents the second derivative of the energy with respect
-        to time. It could be used in calculations related to the dynamics or evolution of the system
-        :param mx: The parameter "mx" likely represents the x-component of the angular momentum. It
-        could be a value that represents the angular momentumum in the x-direction
+        :param d2E: The parameter "d2E" likely represents the second derivative of the energy with respect to time. It could be used in calculations related to the dynamics or evolution of the system
+        :param mx: The parameter "mx" likely represents the x-component of the angular momentum. It could be a value that represents the angular momentumum in the x-direction
         :param my: The parameter "my" represents the angular momentumum in the y-direction
         :param mz: The parameter "mz" represents the angular momentumum in the z-direction. 
-        :param dt: dt is the time step size for the simulation. It determines how small the time intervals
-        are between each step in the simulation
+        :param dt: dt is the time step size for the simulation. It determines how small the time interval are between each step in the simulation
         :param alpha: The parameter "alpha" is a damping parameter. 
         """
         super(RBEhrenfest, self).__init__(Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha)
@@ -287,10 +267,7 @@ class RBEhrenfest(RigidBody):#Ehrenfest scheme for the rigid body, Eq. 5.25a fro
         The function `m_new` calculates and returns a new value for the angular momentum `m` based on the
         current values of `mx`, `my`, and `mz`, as well as other variables and matrices.
         
-        :param with_entropy: The parameter "with_entropy" is a boolean flag that determines whether or not
-        to include entropy in the calculation of the new angular momentum. If it is set to True, entropy
-        will be included in the calculation. If it is set to False (the default value), entropy will not be
-        included, defaults to False (optional)
+        :param with_entropy: The parameter "with_entropy" is a boolean flag that determines whether or not to include entropy in the calculation of the new angular momentum. If it is set to True, entropy will be included in the calculation. If it is set to False (the default value), entropy will not be included, defaults to False (optional)
         :return: the updated value of the angular momentum vector, `m_new`.
         """
         #calculate
@@ -320,14 +297,12 @@ class RBESeReCN(RigidBody):#E-SeRe with Crank Nicolson
         
         :param Ix: The parameter Ix represents the moment of inertia about the x-axis
         :param Iy: The parameter Iy represents the moment of inertia about the y-axis
-        :param Iz: The parameter "Iz" represents the moment of inertia about the z-axis. It is a measure of
-        an object's resistance to changes in its rotational motion about the z-axis
+        :param Iz: The parameter "Iz" represents the moment of inertia about the z-axis. It is a measure of an object's resistance to changes in its rotational motion about the z-axis
         :param d2E: The parameter "d2E" is the Hessian of energy. 
         :param mx: The parameter "mx" represents the x-component of the m vector
         :param my: The parameter "my" represents the moment of inertia in the y-direction
         :param mz: The parameter "mz" represents the moment of inertia in the z-direction
-        :param dt: dt is the time step size for the simulation. It determines the granularity of the
-        simulation and how frequently the system is updated
+        :param dt: dt is the time step size for the simulation. It determines the granularity of the simulation and how frequently the system is updated
         :param alpha: The alpha parameter is a constant that determines the weight of the regularization.
         """
         super(RBESeReCN, self).__init__(Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha)
@@ -367,10 +342,7 @@ class RBESeReCN(RigidBody):#E-SeRe with Crank Nicolson
         The function `m_new` calculates and returns new values for `mx`, `my`, and `mz`, and updates the
         corresponding variables in the class instance.
         
-        :param with_entropy: The "with_entropy" parameter is a boolean flag that determines whether or not
-        to include entropy in the calculation of the new angular momentum. If set to True, entropy will
-        be considered in the calculation. If set to False, entropy will not be considered, defaults to False
-        (optional)
+        :param with_entropy: The "with_entropy" parameter is a boolean flag that determines whether or not to include entropy in the calculation of the new angular momentum. If set to True, entropy will be considered in the calculation. If set to False, entropy will not be considered, defaults to False (optional)
         :return: the updated values of mx, my, and mz as a tuple.
         """
         #calculate
@@ -389,18 +361,13 @@ class RBIMR(RigidBody):#implicit midpoint
         The function initializes an instance of the RBIMR class with given parameters.
         
         :param Ix: The moment of inertia about the x-axis
-        :param Iy: The parameter "Iy" represents the moment of inertia about the y-axis. It is a measure of
-        an object's resistance to changes in rotation about the y-axis
-        :param Iz: The parameter "Iz" represents the moment of inertia about the z-axis. It is a measure of
-        an object's resistance to changes in its rotational motion about the z-axis
-        :param d2E: The parameter "d2E" likely represents the second derivative of the energy function. It
-        could be a function or a value that represents the rate of change of energy with respect to time
+        :param Iy: The parameter "Iy" represents the moment of inertia about the y-axis. It is a measure of an object's resistance to changes in rotation about the y-axis
+        :param Iz: The parameter "Iz" represents the moment of inertia about the z-axis. It is a measure of an object's resistance to changes in its rotational motion about the z-axis
+        :param d2E: The parameter "d2E" likely represents the second derivative of the energy function. It could be a function or a value that represents the rate of change of energy with respect to time
         :param mx: The parameter "mx" represents the x-component of the moment of inertia
         :param my: The parameter "my" represents the moment of inertia about the y-axis
         :param mz: The parameter "mz" represents the moment of inertia about the z-axis
-        :param dt: The parameter "dt" represents the time step or time interval between each iteration or
-        calculation in the RBIMR class. It is used to determine the rate at which the calculations are
-        performed and the accuracy of the results
+        :param dt: The parameter "dt" represents the time step or time interval between each iteration or calculation in the RBIMR class.
         """
         super(RBIMR, self).__init__(Ix, Iy, Iz, d2E, mx, my, mz, dt, 0.0)
 
@@ -409,8 +376,7 @@ class RBIMR(RigidBody):#implicit midpoint
         The function `f` calculates the residual of a given angular field vector `mNew` by using the
         previous angular field vector `mOld` and other variables.
         
-        :param mNew: The parameter `mNew` represents the new values of the angular field components `mx`,
-        `my`, and `mz`
+        :param mNew: The parameter `mNew` represents the new values of the angular field components `mx`, `my`, and `mz`
         :return: a tuple containing the values of `res[0]`, `res[1]`, and `res[2]`.
         """
 
@@ -429,10 +395,7 @@ class RBIMR(RigidBody):#implicit midpoint
         The function `m_new` calculates and returns new values for `mx`, `my`, and `mz`, and updates the
         corresponding variables in the class.
         
-        :param with_entropy: The "with_entropy" parameter is a boolean flag that determines whether or not
-        to include entropy in the calculation of the new value of m. If set to True, entropy will be
-        considered in the calculation. If set to False, entropy will not be considered, defaults to False
-        (optional)
+        :param with_entropy: The "with_entropy" parameter is a boolean flag that determines whether or not to include entropy in the calculation of the new value of m. If set to True, entropy will be considered in the calculation. If set to False, entropy will not be considered, defaults to False (optional)
         :return: the updated values of mx, my, and mz as a tuple.
         """
         #calculate
@@ -453,21 +416,14 @@ class RBESeReFE(RigidBody):#SeRe forward Euler
         class.
         
         :param Ix: The parameter Ix represents the moment of inertia about the x-axis
-        :param Iy: The parameter "Iy" likely represents the moment of inertia about the y-axis. Moment of
-        inertia is a measure of an object's resistance to changes in rotational motion. It depends on the
-        mass distribution of the object and the axis of rotation
-        :param Iz: The parameter "Iz" represents the moment of inertia about the z-axis. Moment of inertia
-        is a measure of an object's resistance to changes in rotational motion. In this case, "Iz"
-        specifically refers to the moment of inertia about the z-axis, which is the axis perpendicular to
-        the
+        :param Iy: The parameter "Iy" likely represents the moment of inertia about the y-axis. Moment of inertia is a measure of an object's resistance to changes in rotational motion.
+        :param Iz: The parameter "Iz" represents the moment of inertia about the z-axis. 
         :param d2E: The parameter "d2E" is the Hessian of energy. 
         :param mx: The parameter "mx" likely represents the x-component of the angular field
         :param my: The parameter "my" likely represents the angular momentum in the y-direction
         :param mz: The parameter "mz" represents the angular field in the z-direction
-        :param dt: dt is the time step size for the simulation. It determines the granularity of the
-        simulation and how frequently the calculations are performed
-        :param alpha: The alpha parameter is a constant that determines the strength of the regularization
-        term in the RBESeReFE algorithm. 
+        :param dt: dt is the time step size for the simulation. It determines the granularity of the simulation and how frequently the calculations are performed
+        :param alpha: The alpha parameter is a constant that determines the strength of the regularization term in the RBESeReFE algorithm. 
         """
         super(RBESeReFE, self).__init__(Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha)
 
@@ -477,9 +433,7 @@ class RBESeReFE(RigidBody):#SeRe forward Euler
         `mOld` and updates the values of `mx`, `my`, and `mz`, and optionally calculates the new entropy if
         `with_entropy` is True.
         
-        :param with_entropy: A boolean parameter that determines whether or not to calculate the new entropy
-        using explicit forward Euler. If set to True, the entropy will be calculated and updated. If set to
-        False, the entropy will not be calculated, defaults to False (optional)
+        :param with_entropy: A boolean parameter that determines whether or not to calculate the new entropy using explicit forward Euler. If set to True, the entropy will be calculated and updated. If set to False, the entropy will not be calculated, defaults to False (optional)
         :return: the updated value of the angular momentum vector, `m`.
         """
 
@@ -513,29 +467,17 @@ class Neural(RigidBody):#SeRe forward Euler
         The function initializes a Neural object with specified parameters and loads a pre-trained neural
         network based on the chosen method.
         
-        :param Ix: The parameter Ix represents the x-component of the input vector. It is used in the
-        initialization of the Neural class
-        :param Iy: The parameter "Iy" represents the y-component of the moment of inertia of the system.
-        Moment of inertia is a measure of an object's resistance to changes in rotational motion. In this
-        context, it is used to describe the rotational behavior of the system along the y-axis
-        :param Iz: Iz is the moment of inertia about the z-axis. It represents the resistance of an object
-        to changes in its rotational motion around the z-axis
-        :param d2E: The parameter `d2E` is a function that represents the second derivative of the energy
-        function. It takes as input the current state of the system and returns the second derivative of the
-        energy with respect to the state variables
+        :param Ix: The parameter Ix represents the x-component of the input vector. It is used in the initialization of the Neural class
+        :param Iy: The parameter "Iy" represents the y-component of the moment of inertia of the system. Moment of inertia is a measure of an object's resistance to changes in rotational motion. In this context, it is used to describe the rotational behavior of the system along the y-axis
+        :param Iz: Iz is the moment of inertia about the z-axis. It represents the resistance of an object to changes in its rotational motion around the z-axis
+        :param d2E: The parameter `d2E` is a function that represents the second derivative of the energy function. It takes as input the current state of the system and returns the second derivative of the energy with respect to the state variables
         :param mx: The parameter `mx` represents the x-component of the angular momentumum 
-        :param my: The parameter `my` represents the value of the angular momentumum in the y-direction. It is
-        used in the initialization of the `Neural` class
+        :param my: The parameter `my` represents the value of the angular momentumum in the y-direction. It is used in the initialization of the `Neural` class
         :param mz: The parameter `mz` represents the value of the angular momentumum in the z-direction
-        :param dt: dt is the time step size used in the simulation. It determines the granularity of the
-        time intervals at which the neural network is updated and the system dynamics are computed
+        :param dt: dt is the time step size used in the simulation. It determines the granularity of the time intervals at which the neural network is updated and the system dynamics are computed
         :param alpha: The parameter "alpha" is a value used in the initialization of the Neural class, damping parameter.
-        :param method: The "method" parameter is used to specify the method for calculating the energy and L
-        matrices in the Neural class. It can take one of the following values:, defaults to without
-        (optional)
-        :param name: The `name` parameter is a string that represents the folder name where the saved models
-        are located. It is used to load the pre-trained neural network models for energy and L (Lagrangian)
-        calculations. The `name` parameter is used to construct the file paths for loading the models
+        :param method: The "method" parameter is used to specify the method for calculating the energy and L matrices in the Neural class. It can take one of the following values:, defaults to without (optional)
+        :param name: The `name` parameter is a string that represents the folder name where the saved models are located. It is used to load the pre-trained neural network models for energy and L (Lagrangian) calculations. The `name` parameter is used to construct the file paths for loading the models
         """
         super(Neural, self).__init__(Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha)
         # Load network
@@ -568,8 +510,7 @@ class Neural(RigidBody):#SeRe forward Euler
         The function `neural_zdot` calculates the Hamiltonian of a neural network given a set of input
         values.
         
-        :param z: The parameter `z` is the input to the `neural_zdot` function. It is a tensor or array that
-        represents the input data for the neural network
+        :param z: The parameter `z` is the input to the `neural_zdot` function. It is a tensor or array that represents the input data for the neural network.
         :return: the hamiltonian, which is a numpy array.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -610,9 +551,7 @@ class Neural(RigidBody):#SeRe forward Euler
         The function `get_cass` takes in a parameter `z`, converts it to a tensor, passes it through a
         neural network `J_net`, and returns the output `cass` as a numpy array.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the neural network
-        `J_net`. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32` and
-        `requires_grad` set to `True`. The `requires_grad` flag
+        :param z: The parameter `z` is a numerical input that is used as an input to the neural network `J_net`. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32` and `requires_grad` set to `True`. The `requires_grad` flag
         :return: the value of `cass` as a NumPy array.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -624,11 +563,8 @@ class Neural(RigidBody):#SeRe forward Euler
         The function `get_L` takes a tensor `z`, passes it through a neural network `L_net`, and returns the
         output `L` as a numpy array.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural
-        network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The
-        `requires_grad=True` argument indicates that gradients will be computed for this
-        :return: the value of L, which is obtained by passing the input z through the L_net neural network
-        and converting the result to a numpy array.
+        :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed for this
+        :return: the value of L, which is obtained by passing the input z through the L_net neural network and converting the result to a numpy array.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
         L = self.L_net(z_tensor).detach().numpy()[0]
@@ -639,9 +575,7 @@ class Neural(RigidBody):#SeRe forward Euler
         The function `get_E` takes a parameter `z`, converts it to a tensor, passes it through a neural
         network called `energy_net`, and returns the resulting energy value.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural
-        network. It is converted to a tensor using `torch.tensor` and is set to have a data type of
-        `torch.float32`. The `requires_grad=True` argument indicates that gradients will
+        :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural network. It is converted to a tensor using `torch.tensor` and is set to have a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will
         :return: the value of E, which is the output of the energy_net model when given the input z.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -653,10 +587,7 @@ class Neural(RigidBody):#SeRe forward Euler
         The function `m_new` calculates new values for `mx`, `my`, and `mz` using the `fsolve` function and
         updates the corresponding variables.
         
-        :param with_entropy: The parameter "with_entropy" is a boolean flag that determines whether or not
-        to include entropy in the calculation of the new value of m. If it is set to True, entropy will be
-        considered in the calculation. If it is set to False, entropy will not be considered, defaults to
-        False (optional)
+        :param with_entropy: The parameter "with_entropy" is a boolean flag that determines whether or not to include entropy in the calculation of the new value of m. If it is set to True, entropy will be considered in the calculation. If it is set to False, entropy will not be considered, defaults to False (optional)
         :return: the updated values of mx, my, and mz as a tuple.
         """
         #calculate
@@ -675,30 +606,17 @@ class RBNeuralIMR(Neural):#implicit midpoint rule
         The above function is the constructor for a class called RBNeuralIMR, which is a subclass of another
         class.
         
-        :param Ix: The parameter Ix represents the moment of inertia about the x-axis. It is a measure of an
-        object's resistance to changes in its rotational motion about the x-axis
-        :param Iy: The parameter "Iy" represents the moment of inertia about the y-axis. Moment of inertia
-        is a measure of an object's resistance to changes in its rotational motion. In this case, "Iy"
-        specifically refers to the moment of inertia about the y-axis
-        :param Iz: The parameter "Iz" represents the moment of inertia about the z-axis. Moment of inertia
-        is a measure of an object's resistance to changes in its rotational motion. In this case, "Iz"
-        specifically refers to the moment of inertia about the z-axis, which is the axis perpendicular to
-        :param d2E: The parameter "d2E" represents the second derivative of the energy function. It is used
-        in the RBNeuralIMR class initialization to calculate the initial values of the neural network
-        weights
-        :param mx: The parameter "mx" represents the x-component of the angular momentum. It is used in
-        the RBNeuralIMR class initialization to define the initial angular momentum state of the system
-        :param my: The parameter "my" represents the angular momentum in the y-direction. It is used in the
-        RBNeuralIMR class initialization to set the initial angular momentum of the system
+        :param Ix: The parameter Ix represents the moment of inertia about the x-axis. It is a measure of an object's resistance to changes in its rotational motion about the x-axis
+        :param Iy: The parameter "Iy" represents the moment of inertia about the y-axis. 
+        :param Iz: The parameter "Iz" represents the moment of inertia about the z-axis. 
+        :param d2E: The parameter "d2E" represents the second derivative of the energy function. 
+        :param mx: The parameter "mx" represents the x-component of the angular momentum. It is used in the RBNeuralIMR class initialization to define the initial angular momentum state of the system
+        :param my: The parameter "my" represents the angular momentum in the y-direction. It is used in the RBNeuralIMR class initialization to set the initial angular momentum of the system
         :param mz: The parameter "mz" represents the angular momentum in the z-direction
-        :param dt: dt is the time step size for the simulation. It determines the granularity of the
-        simulation, with smaller values resulting in more accurate but slower simulations
-        :param alpha: The alpha parameter is a constant that determines the strength of the damping in the
-        system. It is used in the calculation of the damping force in the RBNeuralIMR class
-        :param method: The "method" parameter is used to specify the method to be used for the calculation.
-        The default value is set to "without", defaults to without (optional)
-        :param name: The name parameter is used to specify the folder name where the results of the
-        RBNeuralIMR class will be saved. If no name is provided, it will use the DEFAULT_folder_name
+        :param dt: dt is the time step size for the simulation. It determines the granularity of the simulation, with smaller values resulting in more accurate but slower simulations
+        :param alpha: The alpha parameter is a constant that determines the strength of the damping in the system. It is used in the calculation of the damping force in the RBNeuralIMR class
+        :param method: The "method" parameter is used to specify the method to be used for the calculation. The default value is set to "without", defaults to without (optional)
+        :param name: The name parameter is used to specify the folder name where the results of the RBNeuralIMR class will be saved. If no name is provided, it will use the DEFAULT_folder_name
         """
         super(RBNeuralIMR, self).__init__(Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha, method = method, name = name)
 
@@ -729,27 +647,17 @@ class HeavyTopCN(RigidBody): #Crank-Nicolson
         
         :param Ix: The moment of inertia about the x-axis
         :param Iy: The parameter Iy represents the moment of inertia about the y-axis of a heavy top
-        :param Iz: The parameter "Iz" represents the moment of inertia of the heavy top around the z-axis.
-        It is a measure of how the mass is distributed around the z-axis and affects the rotational motion
-        of the heavy top
-        :param d2E: The parameter "d2E" represents the second derivative of the energy function. It is a
-        function that calculates the second derivative of the energy with respect to the angles of rotation
+        :param Iz: The parameter "Iz" represents the moment of inertia of the heavy top around the z-axis. 
+        :param d2E: The parameter "d2E" represents the second derivative of the energy function. It is a function that calculates the second derivative of the energy with respect to the angles of rotation
         :param mx: The mx parameter represents the x-component of the angular momentumum vector
-        :param my: The parameter "my" represents the mass of the object along the y-axis in the HeavyTopCN
-        class
+        :param my: The parameter "my" represents the mass of the object along the y-axis in the HeavyTopCN class
         :param mz: The parameter `mz` represents the z-component of the angular momentumum vector
-        :param dt: dt is the time step size for the simulation. It determines how small the time intervals
-        are between each update of the system
-        :param alpha: The parameter alpha is a constant used in the calculation of the time derivative of
-        the angular momentumum. It is typically a small value that determines the accuracy and stability of
-        the numerical integration method used to solve the equations of motion
-        :param Mgl: The parameter Mgl represents the potential energy due to gravity for the heavy top
-        system. It is used in the Hamiltonian equation to calculate the total energy of the system
+        :param dt: dt is the time step size for the simulation. It determines how small the time intervals are between each update of the system
+        :param alpha: The parameter alpha is a constant used in the calculation of the time derivative of the angular momentumum. It is typically a small value that determines the accuracy and stability of the numerical integration method used to solve the equations of motion
+        :param Mgl: The parameter Mgl represents the potential energy due to gravity for the heavy top system. It is used in the Hamiltonian equation to calculate the total energy of the system
         :param init_rx: The initial x-coordinate of the position vector r
-        :param init_ry: The parameter `init_ry` represents the initial value for the y-coordinate of the
-        vector `r`. It is used in the initialization of the `HeavyTopCN` class
-        :param init_rz: The parameter `init_rz` represents the initial value of the z-coordinate of the
-        vector `r`. It is used in the initialization of the `HeavyTopCN` class
+        :param init_ry: The parameter `init_ry` represents the initial value for the y-coordinate of the vector `r`. It is used in the initialization of the `HeavyTopCN` class
+        :param init_rz: The parameter `init_rz` represents the initial value of the z-coordinate of the vector `r`. It is used in the initialization of the `HeavyTopCN` class
         """
         super(HeavyTopCN, self).__init__(Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha)
         self.Mgl = Mgl #Hamiltonian = 1/2 M I^{-1} M + Mgl r . chi
@@ -763,8 +671,7 @@ class HeavyTopCN(RigidBody): #Crank-Nicolson
         of the object's position vector and a given vector.
         
         :param m: The parameter `m` represents the mass of the object
-        :return: the sum of the energy calculated by the parent class (using the `energy()` method) and the
-        dot product of `self.r` and `self.chi`, multiplied by `self.Mgl`.
+        :return: the sum of the energy calculated by the parent class (using the `energy()` method) and the dot product of `self.r` and `self.chi`, multiplied by `self.Mgl`.
         """
         return super(HeavyTopCN,self).energy() + self.Mgl*np.dot(self.r, self.chi)
 
@@ -773,8 +680,7 @@ class HeavyTopCN(RigidBody): #Crank-Nicolson
         The function `get_L` returns a 6x6 numpy array `L` based on the input parameter `m` and the
         attributes `self.mz`, `self.my`, `self.mx`, and `self.r`.
         
-        :param m: The parameter `m` is not defined in the code snippet you provided. It is a
-        variable that represents the moment of inertia.
+        :param m: The parameter `m` is not defined in the code snippet you provided. It is a variable that represents the moment of inertia.
         :return: The function `get_L` returns a numpy array `L` which is a 6x6 matrix.
         """
         L = np.array([
@@ -791,8 +697,7 @@ class HeavyTopCN(RigidBody): #Crank-Nicolson
         The function `f` calculates the residuals for a given set of input variables.
         
         :param mrnew: The parameter `mrnew` is a tuple containing the values for `mNew` and `rNew`
-        :return: a tuple containing the values of `m_res[0]`, `m_res[1]`, `m_res[2]`, `r_res[0]`,
-        `r_res[1]`, and `r_res[2]`.
+        :return: a tuple containing the values of `m_res[0]`, `m_res[1]`, `m_res[2]`, `r_res[0]`, `r_res[1]`, and `r_res[2]`.
         """
         mNew = (mrnew[0], mrnew[1], mrnew[2])
         rNew = (mrnew[3], mrnew[4], mrnew[5])
@@ -821,9 +726,7 @@ class HeavyTopCN(RigidBody): #Crank-Nicolson
         The function `m_new` calculates new values for `mx`, `my`, `mz`, and `r` using the `fsolve` function
         and returns the updated values.
         
-        :param with_entropy: The parameter "with_entropy" is a boolean flag that determines whether or not
-        to include entropy in the calculation. If it is set to True, entropy will be included in the
-        calculation. If it is set to False, entropy will not be included, defaults to False (optional)
+        :param with_entropy: The parameter "with_entropy" is a boolean flag that determines whether or not to include entropy in the calculation. If it is set to True, entropy will be included in the calculation. If it is set to False, entropy will not be included, defaults to False (optional)
         :return: a tuple containing the updated values of (self.mx, self.my, self.mz) and self.r.
         """
         #calculate
@@ -846,8 +749,7 @@ class HeavyTopIMR(HeavyTopCN): #implicit midpoint rule
         The function `f` calculates the residuals for a given set of inputs and returns them as a tuple.
         
         :param mrnew: The parameter `mrnew` is a list or tuple containing the following elements:
-        :return: a tuple containing the values of `m_res[0]`, `m_res[1]`, `m_res[2]`, `r_res[0]`,
-        `r_res[1]`, and `r_res[2]`.
+        :return: a tuple containing the values of `m_res[0]`, `m_res[1]`, `m_res[2]`, `r_res[0]`, `r_res[1]`, and `r_res[2]`.
         """
         mNew = (mrnew[0], mrnew[1], mrnew[2])
         rNew = (mrnew[3], mrnew[4], mrnew[5])
@@ -878,34 +780,19 @@ class HeavyTopNeural(HeavyTopCN):
         
         :param Ix: The parameter Ix represents the moment of inertia of the heavy top about the x-axis
         :param Iy: The parameter "Iy" represents the moment of inertia about the y-axis of a heavy top.
-        Moment of inertia is a measure of an object's resistance to changes in its rotational motion. In the
-        context of a heavy top, it represents how the mass is distributed around the y-axis and affects the
-        :param Iz: Iz is the moment of inertia about the z-axis. It represents the resistance of the object
-        to rotational motion around the z-axis
-        :param d2E: The parameter `d2E` represents the second derivative of the energy function. It is a
-        function that takes in the current state of the system and returns the second derivative of the
-        energy with respect to the state variables
+        :param Iz: Iz is the moment of inertia about the z-axis. 
+        :param d2E: The parameter `d2E` represents the second derivative of the energy function. 
         :param mx: The parameter `mx` represents the x-component of the angular momentum of the heavy top
         :param my: The parameter `my` represents the angular momentum in the y-axis of a heavy top.
         :param mz: The parameter `mz` represents the angular momentum of the heavy top along the z-axis
-        :param dt: dt is the time step size for the simulation. It determines how small the time intervals
-        are between each iteration of the simulation
+        :param dt: dt is the time step size for the simulation. It determines how small the time intervals are between each iteration of the simulation
         :param alpha: A damping parameter.
-        :param Mgl: Mgl is the product of the mass of the heavy top and the acceleration due to gravity. It
-        represents the gravitational potential energy of the system
-        :param init_rx: The parameter `init_rx` represents the initial value of the x-coordinate of the
-        heavy top's center of mass
-        :param init_ry: The parameter `init_ry` represents the initial value of the y-component of the
-        angular velocity of the heavy top. It is used to initialize the simulation of the heavy top's motion
-        :param init_rz: The parameter `init_rz` represents the initial value of the rotation about the
-        z-axis (yaw) for the HeavyTopNeural object. It is used to specify the initial orientation of the
-        heavy top
-        :param method: The "method" parameter is used to specify the method for solving the equations of
-        motion in the HeavyTopNeural class. It can take one of the following values:, defaults to without
-        (optional)
-        :param name: The `name` parameter is a string that represents the name of the folder where the saved
-        models are located. It is used to load the pre-trained neural network models for energy and angular
-        momentum calculations
+        :param Mgl: Mgl is the product of the mass of the heavy top and the acceleration due to gravity. It represents the gravitational potential energy of the system
+        :param init_rx: The parameter `init_rx` represents the initial value of the x-coordinate of the heavy top's center of mass
+        :param init_ry: The parameter `init_ry` represents the initial value of the y-component of the angular velocity of the heavy top. It is used to initialize the simulation of the heavy top's motion
+        :param init_rz: The parameter `init_rz` represents the initial value of the rotation about the z-axis (yaw) for the HeavyTopNeural object. It is used to specify the initial orientation of the heavy top
+        :param method: The "method" parameter is used to specify the method for solving the equations of motion in the HeavyTopNeural class. It can take one of the following values:, defaults to without (optional)
+        :param name: The `name` parameter is a string that represents the name of the folder where the saved models are located. It is used to load the pre-trained neural network models for energy and angular momentum calculations
         """
         super(HeavyTopNeural, self).__init__(Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha, Mgl, init_rx, init_ry, init_rz)
         # Load network
@@ -939,8 +826,7 @@ class HeavyTopNeural(HeavyTopCN):
         The `neural_zdot` function calculates the Hamiltonian of a neural network given a set of input
         values.
         
-        :param z: The parameter `z` is the input to the `neural_zdot` function. It is expected to be a
-        numerical value or an array-like object that can be converted to a tensor
+        :param z: The parameter `z` is the input to the `neural_zdot` function. It is expected to be a numerical value or an array-like object that can be converted to a tensor
         :return: The function `neural_zdot` returns the variable `hamiltonian`.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -987,10 +873,7 @@ class HeavyTopNeural(HeavyTopCN):
         The function `get_cass` takes in a parameter `z`, converts it to a tensor, passes it through a
         neural network `J_net`, and returns the output `cass` as a numpy array.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the neural network. It
-        is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The
-        `requires_grad=True` argument indicates that gradients will be computed for this tensor during
-        backprop
+        :param z: The parameter `z` is a numerical input that is used as an input to the neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed for this tensor during backprop
         :return: the value of `cass` as a NumPy array.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -1002,11 +885,8 @@ class HeavyTopNeural(HeavyTopCN):
         The function `get_L` takes a tensor `z`, passes it through a neural network `L_net`, and returns the
         output `L` as a numpy array.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural
-        network. It is converted to a tensor using `torch.tensor` and is set to have a data type of
-        `torch.float32`. The `requires_grad=True` argument indicates that gradients will
-        :return: the value of L, which is obtained by passing the input z through the L_net neural network
-        and converting the result to a numpy array.
+        :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural network. It is converted to a tensor using `torch.tensor` and is set to have a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will
+        :return: the value of L, which is obtained by passing the input z through the L_net neural network and converting the result to a numpy array.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
         L = self.L_net(z_tensor).detach().numpy()[0]
@@ -1017,9 +897,7 @@ class HeavyTopNeural(HeavyTopCN):
         The function `get_E` takes a parameter `z`, converts it to a tensor, passes it through a neural
         network called `energy_net`, and returns the resulting energy value.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural
-        network. It is converted to a tensor using `torch.tensor` and is set to have a data type of
-        `torch.float32`. The `requires_grad=True` argument indicates that gradients will
+        :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural network. It is converted to a tensor using `torch.tensor` and is set to have a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will
         :return: the value of E, which is the output of the energy_net model when given the input z.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -1032,12 +910,8 @@ class HeavyTopNeural(HeavyTopCN):
         The function `m_new` calculates new values for `mx`, `my`, `mz`, and `r` based on the current values
         and returns the updated values.
         
-        :param with_entropy: The `with_entropy` parameter is a boolean flag that determines whether or not
-        to include entropy in the calculation. If `with_entropy` is set to `True`, entropy will be included
-        in the calculation. If `with_entropy` is set to `False` (default), entropy will not be included,
-        defaults to False (optional)
-        :return: The function `m_new` returns a tuple containing the updated values of `mx`, `my`, `mz`
-        (magnetic field components) and `r` (position vector).
+        :param with_entropy: The `with_entropy` parameter is a boolean flag that determines whether or not to include entropy in the calculation. If `with_entropy` is set to `True`, entropy will be included in the calculation. If `with_entropy` is set to `False` (default), entropy will not be included, defaults to False (optional)
+        :return: The function `m_new` returns a tuple containing the updated values of `mx`, `my`, `mz` (momefield components) and `r` (position vector).
         """
         #calculate
         mr_new = fsolve(self.f, (self.mx, self.my, self.mz, self.r[0], self.r[1], self.r[2]))
@@ -1059,8 +933,7 @@ class HeavyTopNeuralIMR(HeavyTopNeural):
         The function `f` calculates the difference between the old and new values of `mr` and adds the
         product of `dt` and the derivative of `z` with respect to `mr`.
         
-        :param mrNew: The parameter `mrNew` is a list or array containing the new values for `mx`, `my`,
-        `mz`, and `r`
+        :param mrNew: The parameter `mrNew` is a list or array containing the new values for `mx`, `my`, `mz`, and `r`
         :return: the value of the variable "res".
         """
 
@@ -1083,18 +956,13 @@ class Particle3DCN(object): #Crank-Nicolson
         
         :param M: The parameter M represents the mass of the particle in the Hamiltonian equation
         :param dt: dt is the time step size. It determines the size of each time step in the simulation
-        :param alpha: The alpha parameter represents the strength of the harmonic potential in the
-        Hamiltonian. It determines how tightly the particle is confined in space. A larger value of alpha
-        corresponds to a stronger confinement
+        :param alpha: The alpha parameter represents the strength of the harmonic potential in the Hamiltonian. It determines how tightly the particle is confined in space. A larger value of alpha corresponds to a stronger confinement
         :param init_rx: The initial x-coordinate of the position vector
-        :param init_ry: The parameter `init_ry` represents the initial y-coordinate of the position vector
-        `r`. It is used to specify the initial position of the particle in the y-direction
-        :param init_rz: The parameter `init_rz` represents the initial position in the z-direction. It is
-        used to initialize the position vector `self.r` in the `__init__` method of the class
+        :param init_ry: The parameter `init_ry` represents the initial y-coordinate of the position vector `r`. It is used to specify the initial position of the particle in the y-direction
+        :param init_rz: The parameter `init_rz` represents the initial position in the z-direction. It is used to initialize the position vector `self.r` in the `__init__` method of the class
         :param init_mx: The initial momentum in the x-direction
         :param init_my: The parameter `init_my` represents the initial momentum in the y-direction
-        :param init_mz: The parameter `init_mz` represents the initial value of the momentum component in
-        the z-direction
+        :param init_mz: The parameter `init_mz` represents the initial value of the momentum component in the z-direction
         """
         self.M = M #Hamiltonian = 1/2 p^2/M + 1/2 alpha r^2
         self.r = np.array((init_rx, init_ry, init_rz))
@@ -1107,10 +975,8 @@ class Particle3DCN(object): #Crank-Nicolson
         The function `get_E` calculates the total energy `E` based on the input `m` and some constants `M`
         and `alpha`.
         
-        :param m: The parameter `m` is a list or tuple containing six elements. The elements represent the
-        values of `m[0]`, `m[1]`, `m[2]`, `m[3]`, `m[4]`, and `m[5]`, where the first three give the position while the latter three position
-        :return: The function `get_E` returns the value of the expression `0.5*(m[3]**2 + m[4]**2 +
-        m[5]**2)/self.M + 0.5 *self.alpha * (m[0]**2 + m[1]**2 + m[2]**2)`.
+        :param m: The parameter `m` is a list or tuple containing six elements. The elements represent the values of `m[0]`, `m[1]`, `m[2]`, `m[3]`, `m[4]`, and `m[5]`, where the first three give the position while the latter three position
+        :return: The function `get_E` returns the value of the expression `0.5*(m[3]**2 + m[4]**2 + m[5]**2)/self.M + 0.5 *self.alpha * (m[0]**2 + m[1]**2 + m[2]**2)`.
         """
         return 0.5*(m[3]**2 + m[4]**2 + m[5]**2)/self.M + 0.5 *self.alpha * (m[0]**2 + m[1]**2 + m[2]**2)
 
@@ -1118,8 +984,7 @@ class Particle3DCN(object): #Crank-Nicolson
         """
         The function `get_L` returns a 6x6 numpy array representing a transformation matrix.
         
-        :param m: The parameter `m` is a tuple with three elements representing the x, y, and z coordinates
-        respectively. The default value for `m` is (0.0, 0.0, 0.0)
+        :param m: The parameter `m` is a tuple with three elements representing the x, y, and z coordinates respectively. The default value for `m` is (0.0, 0.0, 0.0)
         :return: The function `get_L` returns a 6x6 numpy array `L` with the following values:
         """
         L = np.array([
@@ -1136,11 +1001,8 @@ class Particle3DCN(object): #Crank-Nicolson
         The function `f` calculates the residual of a given set of input parameters `rpNew` by performing a
         series of mathematical operations.
         
-        :param rpNew: The parameter `rpNew` is a list or array containing the new values of `r` and `p`. It
-        should have a length of 6, where the first 3 elements represent the new values of `r` and the last 3
-        elements represent the new values of `p`
-        :return: a tuple containing the values of `rpres[0]`, `rpres[1]`, `rpres[2]`, `rpres[3]`,
-        `rpres[4]`, and `rpres[5]`.
+        :param rpNew: The parameter `rpNew` is a list or array containing the new values of `r` and `p`. It should have a length of 6, where the first 3 elements represent the new values of `r` and the last 3 elements represent the new values of `p`
+        :return: a tuple containing the values of `rpres[0]`, `rpres[1]`, `rpres[2]`, `rpres[3]`, `rpres[4]`, and `rpres[5]`.
         """
         rpOld = np.array([self.r[0], self.r[1], self.r[2], self.p[0], self.p[1], self.p[2]])
         #dEOld = np.concatenate([self.p/self.M, self.alpha*self.r])
@@ -1162,8 +1024,8 @@ class Particle3DCN(object): #Crank-Nicolson
         """
         The function `m_new` calculates new values for `r` and `p` using the `fsolve` function and returns
         the updated values.
-        :return: The function `m_new` returns a tuple containing two tuples. The first tuple contains the
-        values `(rx, ry, rz)` and the second tuple contains the values `(px, py, pz)`.
+
+        :return: The function `m_new` returns a tuple containing two tuples. The first tuple contains the values `(rx, ry, rz)` and the second tuple contains the values `(px, py, pz)`.
         """
         #calculate
         #(self.r[0], self.r[1], self.r[2], self.p[0], self.p[1], self.p[2]) = fsolve(self.f, (self.r[0], self.r[0], self.r[0], self.p[0], self.p[1], self.p[2]))
@@ -1193,10 +1055,8 @@ class Particle3DIMR(Particle3DCN):
         The function `f` calculates the residual of a given input `rpNew` by performing a series of
         mathematical operations.
         
-        :param rpNew: The parameter `rpNew` is a numpy array that represents the new values of position and
-        momentum. It has the following structure:
-        :return: a tuple containing the values of `rpres[0]`, `rpres[1]`, `rpres[2]`, `rpres[3]`,
-        `rpres[4]`, and `rpres[5]`.
+        :param rpNew: The parameter `rpNew` is a numpy array that represents the new values of position and momentum. It has the following structure:
+        :return: a tuple containing the values of `rpres[0]`, `rpres[1]`, `rpres[2]`, `rpres[3]`, `rpres[4]`, and `rpres[5]`.
         """
         rpOld = np.array([self.r[0], self.r[1], self.r[2], self.p[0], self.p[1], self.p[2]])
         rp_mid = 0.5*(np.array(rpNew)+rpOld)
@@ -1213,29 +1073,16 @@ class Particle3DNeural(Particle3DCN):
         network based on the chosen method.
         
         :param M: The parameter M represents the mass of the particle
-        :param dt: dt is the time step size for the simulation. It determines how much time elapses between
-        each iteration of the simulation
-        :param alpha: The parameter "alpha" is a value used in the calculation of the forces acting on the
-        particle. It represents the strength of the forces relative to the mass of the particle. A higher
-        value of alpha will result in stronger forces, while a lower value will result in weaker forces
+        :param dt: dt is the time step size for the simulation. It determines how much time elapses between each iteration of the simulation
+        :param alpha: The parameter "alpha" is a value used in the calculation of the forces acting on the particle. It represents the strength of the forces relative to the mass of the particle. 
         :param init_rx: The parameter `init_rx` is the initial x-coordinate of the particle's position
-        :param init_ry: The parameter `init_ry` represents the initial value for the y-component of the
-        particle's position. It is used to initialize the particle's position in the y-direction
-        :param init_rz: The parameter `init_rz` represents the initial value of the z-coordinate of the
-        particle's position. It is used to initialize the particle's position in the z-direction
+        :param init_ry: The parameter `init_ry` represents the initial value for the y-component of the particle's position. It is used to initialize the particle's position in the y-direction
+        :param init_rz: The parameter `init_rz` represents the initial value of the z-coordinate of the particle's position. It is used to initialize the particle's position in the z-direction
         :param init_mx: The parameter `init_mx` is the initial x-component of the particle's angular momentum
-        :param init_my: The parameter `init_my` is the initial y-component of the particle's magnetic
-        moment. It represents the starting value of the y-coordinate of the particle's angular momentum
-        vector
-        :param init_mz: The parameter `init_mz` represents the initial value of the z-component of the
-        particle's angular momentum. It is used to initialize the particle's angular momentum in the
-        `__init__` method of the `Particle3DNeural` class
-        :param method: The "method" parameter is used to specify the method for solving the equations of
-        motion for the Particle3DNeural object. There are three possible values for this parameter:,
-        defaults to without (optional)
-        :param name: The `name` parameter is a string that represents the name of the folder where the saved
-        models are located. It is used to load the pre-trained neural network models for energy and L
-        (angular momentum) calculations
+        :param init_my: The parameter `init_my` is the initial y-component of the particle's angular momentum 
+        :param init_mz: The parameter `init_mz` represents the initial value of the z-component of the particle's angular momentum. It is used to initialize the particle's angular momentum in the `__init__` method of the `Particle3DNeural` class
+        :param method: The "method" parameter is used to specify the method for solving the equations of motion for the Particle3DNeural object. There are three possible values for this parameter:, defaults to without (optional)
+        :param name: The `name` parameter is a string that represents the name of the folder where the saved models are located. It is used to load the pre-trained neural network models for energy and L (angular momentum) calculations
         """
         super(Particle3DNeural, self).__init__(M, dt, alpha, init_rx, init_ry, init_rz, init_mx, init_my, init_mz)
         # Load network
@@ -1269,8 +1116,7 @@ class Particle3DNeural(Particle3DCN):
         The function `neural_zdot` calculates the Hamiltonian of a neural network model given a set of
         input parameters.
         
-        :param z: The parameter `z` is a tensor representing the input to the neural network. It is of type
-        `torch.Tensor` and has a shape determined by the specific neural network architecture being used
+        :param z: The parameter `z` is a tensor representing the input to the neural network. It is of type `torch.Tensor` and has a shape determined by the specific neural network architecture being used
         :return: the Hamiltonian, which is a scalar value representing the energy of the system.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -1313,10 +1159,7 @@ class Particle3DNeural(Particle3DCN):
         The function `get_cass` takes in a parameter `z`, converts it to a tensor, passes it through a
         neural network `J_net`, and returns the output `cass` as a numpy array.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the neural network. It
-        is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The
-        `requires_grad=True` argument indicates that gradients will be computed for this tensor during
-        backprop
+        :param z: The parameter `z` is a numerical input that is used as an input to the neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed for this tensor during backprop
         :return: the value of `cass` as a NumPy array.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -1328,11 +1171,8 @@ class Particle3DNeural(Particle3DCN):
         The function `get_L` takes a tensor `z`, passes it through a neural network `L_net`, and returns the
         output `L` as a numpy array.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural
-        network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The
-        `requires_grad=True` argument indicates that gradients will be computed with respect
-        :return: the value of L, which is obtained by passing the input z through the L_net neural network
-        and converting the result to a numpy array.
+        :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed with respect
+        :return: the value of L, which is obtained by passing the input z through the L_net neural network and converting the result to a numpy array.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
         L = self.L_net(z_tensor).detach().numpy()[0]
@@ -1343,9 +1183,7 @@ class Particle3DNeural(Particle3DCN):
         The function `get_E` takes a parameter `z`, converts it to a tensor, passes it through a neural
         network called `energy_net`, and returns the resulting energy value.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural
-        network. It is converted to a tensor using `torch.tensor` and is set to have a data type of
-        `torch.float32`. The `requires_grad=True` argument indicates that gradients will
+        :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural network. It is converted to a tensor using `torch.tensor` and is set to have a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will
         :return: the value of E, which is the output of the energy_net model when given the input z.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -1357,6 +1195,7 @@ class Particle3DNeural(Particle3DCN):
         """
         The function `m_new` calculates new values for `r` and `p` using the `fsolve` function and returns
         them as a tuple.
+
         :return: a tuple containing the updated values of `self.r` and `self.p`.
         """
         #calculate
@@ -1391,10 +1230,8 @@ class Particle3DKeplerIMR(Particle3DIMR):
         """
         The function f calculates the residual of a given set of inputs and returns it as a tuple.
         
-        :param rpNew: The parameter `rpNew` is a numpy array that represents the new values of position and
-        momentum. It has a shape of (6,) and contains the following elements:
-        :return: a tuple containing the values of `rpres[0]`, `rpres[1]`, `rpres[2]`, `rpres[3]`,
-        `rpres[4]`, and `rpres[5]`.
+        :param rpNew: The parameter `rpNew` is a numpy array that represents the new values of position and momentum. It has a shape of (6,) and contains the following elements:
+        :return: a tuple containing the values of `rpres[0]`, `rpres[1]`, `rpres[2]`, `rpres[3]`, `rpres[4]`, and `rpres[5]`.
         """
         rpOld = np.array([self.r[0], self.r[1], self.r[2], self.p[0], self.p[1], self.p[2]])
         rp_mid = 0.5*(np.array(rpNew)+rpOld)
@@ -1412,17 +1249,12 @@ class Particle2DIMR(object): #Implicit midpont rule
         
         :param M: The parameter M represents the mass of the particle in the Hamiltonian
         :param dt: dt is the time step size. It determines the size of each time step in the simulation
-        :param alpha: The parameter alpha represents the strength of the harmonic potential in the
-        Hamiltonian. It determines how tightly the particle is confined to the potential well. A larger
-        value of alpha corresponds to a stronger confinement
+        :param alpha: The parameter alpha represents the strength of the harmonic potential in the Hamiltonian. It determines how tightly the particle is confined to the potential well. A larger value of alpha corresponds to a stronger confinement
         :param init_rx: The initial x-coordinate of the position vector
-        :param init_ry: The parameter `init_ry` represents the initial y-coordinate of the position vector.
-        It is used to specify the initial position of the particle in the y-direction
+        :param init_ry: The parameter `init_ry` represents the initial y-coordinate of the position vector. It is used to specify the initial position of the particle in the y-direction
         :param init_mx: The initial momentum in the x-direction
         :param init_my: The parameter `init_my` represents the initial momentum in the y-direction
-        :param zeta: The parameter zeta represents the damping coefficient in the system. It determines the
-        rate at which the system loses energy due to damping. A higher value of zeta leads to faster energy
-        dissipation and damping of the system
+        :param zeta: The parameter zeta represents the damping coefficient in the system. It determines the rate at which the system loses energy due to damping. A higher value of zeta leads to faster energy dissipation and damping of the system.
         """
         self.M = M #Hamiltonian = 1/2 p^2/M + 1/2 alpha r^2
         self.r = np.array((init_rx, init_ry))
@@ -1433,14 +1265,10 @@ class Particle2DIMR(object): #Implicit midpont rule
 
     def get_E(self, m):
         """
-        The function `get_E` calculates the total energy `E` based on the input `m` and the class attributes
-        `M` and `alpha`.
+        The function `get_E` calculates the total energy `E` based on the input `m` and the class attributes `M` and `alpha`.
         
-        :param m: The parameter `m` is a list or tuple containing four elements. The first two elements
-        (`m[0]` and `m[1]`) represent the x and y components of a vector, while the last two elements
-        (`m[2]` and `m[3]`) represent
-        :return: the value of the expression 0.5*(m[2]**2 + m[3]**2)/self.M + 0.5 *self.alpha * (m[0]**2 +
-        m[1]**2).
+        :param m: The parameter `m` is a list or tuple containing four elements. The first two elements (`m[0]` and `m[1]`) represent the x and y components of the position vector, while the last two elements (`m[2]` and `m[3]`) represent the momentum.
+        :return: the value of the expression 0.5*(m[2]**2 + m[3]**2)/self.M + 0.5 *self.alpha * (m[0]**2 + m[1]**2).
         """
         return 0.5*(m[2]**2 + m[3]**2)/self.M + 0.5 *self.alpha * (m[0]**2 + m[1]**2)
 
@@ -1448,8 +1276,7 @@ class Particle2DIMR(object): #Implicit midpont rule
         """
         The function `get_L` returns a 4x4 numpy array representing a transformation matrix.
         
-        :param m: The parameter `m` is a tuple with three elements representing the x, y, and z coordinates
-        respectively. The default value for `m` is (0.0, 0.0, 0.0)
+        :param m: The parameter `m` is a tuple with three elements representing the x, y, and z coordinates respectively. The default value for `m` is (0.0, 0.0, 0.0)
         :return: a 4x4 numpy array called L.
         """
         L = np.array([
@@ -1464,8 +1291,7 @@ class Particle2DIMR(object): #Implicit midpont rule
         The function f calculates the residual of the difference between the old and new values of r and p,
         taking into account various factors such as mass, dissipation, and time step.
         
-        :param rpNew: The parameter `rpNew` is a numpy array containing the new values of position and
-        momentum. It has the form `[x_new, y_new, px_new, py_new]`
+        :param rpNew: The parameter `rpNew` is a numpy array containing the new values of position and momentum. It has the form `[x_new, y_new, px_new, py_new]`
         :return: a tuple containing the values of `rpres[0]`, `rpres[1]`, `rpres[2]`, and `rpres[3]`.
         """
         rpOld = np.array([self.r[0], self.r[1], self.p[0], self.p[1]])
@@ -1478,10 +1304,8 @@ class Particle2DIMR(object): #Implicit midpont rule
 
     def m_new(self): #return new r and p
         """
-        The function `m_new` returns new values for `r` and `p` by solving a system of equations using the
-        `fsolve` function.
-        :return: a tuple containing two tuples. The first tuple contains the values of `rx` and `ry`, and
-        the second tuple contains the values of `px` and `py`.
+        The function `m_new` returns new values for `r` and `p` by solving a system of equations using the `fsolve` function.
+        :return: a tuple containing two tuples. The first tuple contains the values of `rx` and `ry`, and the second tuple contains the values of `px` and `py`.
         """
         (rx, ry, px, py) = fsolve(self.f, (self.r[0], self.r[1], self.p[0], self.p[1]))
         self.r[0] = rx
@@ -1497,24 +1321,15 @@ class Particle2DNeural(Particle2DIMR):
         network based on the chosen method.
         
         :param M: The parameter M represents the mass of the particle
-        :param dt: dt is the time step size for the simulation. It determines how much time elapses between
-        each iteration of the simulation
+        :param dt: dt is the time step size for the simulation. It determines how much time elapses between each iteration of the simulation
         :param alpha: Provides the strength of external field.
-        :param init_rx: The parameter `init_rx` represents the initial x-coordinate of the particle's
-        position
-        :param init_ry: The parameter `init_ry` represents the initial y-coordinate of the particle in a 2D
-        space. It is used to specify the starting position of the particle along the y-axis
-        :param init_mx: The parameter `init_mx` represents the initial x-component of the momentum of the
-        particle
-        :param init_my: The parameter `init_my` represents the initial y-coordinate of the momentum of the
-        particle in a 2D system. It is used to initialize the momentum of the particle along the y-axis
+        :param init_rx: The parameter `init_rx` represents the initial x-coordinate of the particle's position
+        :param init_ry: The parameter `init_ry` represents the initial y-coordinate of the particle in a 2D space. It is used to specify the starting position of the particle along the y-axis
+        :param init_mx: The parameter `init_mx` represents the initial x-component of the momentum of the particle
+        :param init_my: The parameter `init_my` represents the initial y-coordinate of the momentum of the particle in a 2D system. It is used to initialize the momentum of the particle along the y-axis
         :param zeta: A friction coefficient in the equations.
-        :param method: The "method" parameter is used to specify the method for solving the equations of
-        motion in the Particle2DNeural class. It can take one of the following values:, defaults to without
-        (optional)
-        :param name: The `name` parameter is a string that represents the name of the folder where the saved
-        models are located. It is used to load the pre-trained neural network models for energy and L
-        (Lagrangian) calculations. 
+        :param method: The "method" parameter is used to specify the method for solving the equations of motion in the Particle2DNeural class. It can take one of the following values:, defaults to without (optional)
+        :param name: The `name` parameter is a string that represents the name of the folder where the saved models are located. It is used to load the pre-trained neural network models for energy and L (Lagrangian) calculations. 
         """
         super(Particle2DNeural, self).__init__(M, dt, alpha, init_rx, init_ry, init_mx, init_my, zeta)
         # Load network
@@ -1547,8 +1362,7 @@ class Particle2DNeural(Particle2DIMR):
         """
         The function `neural_zdot` calculates the Hamiltonian for a given input `z` using neural networks.
         
-        :param z: The parameter `z` is a tensor representing the input to the neural network. It is of type
-        `torch.Tensor` and has a shape determined by the specific neural network architecture being used
+        :param z: The parameter `z` is a tensor representing the input to the neural network. It is of type `torch.Tensor` and has a shape determined by the specific neural network architecture being used.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
         En = self.energy_net(z_tensor)
@@ -1571,8 +1385,7 @@ class Particle2DNeural(Particle2DIMR):
         The function `f` calculates the residual between the old and new values of `rp` and the time
         derivative of `z`.
         
-        :param rpNew: The parameter `rpNew` represents the new values of `r` and `p` that are being passed
-        to the function `f`
+        :param rpNew: The parameter `rpNew` represents the new values of `r` and `p` that are being passed to the function `f`
         :return: the value of the variable "res".
         """
         rpOld = np.concatenate([self.r, self.p])
@@ -1587,10 +1400,7 @@ class Particle2DNeural(Particle2DIMR):
         The function `get_cass` takes in a parameter `z`, converts it to a tensor, passes it through a
         neural network `J_net`, and returns the output `cass` as a numpy array.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the neural network. It
-        is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The
-        `requires_grad=True` argument indicates that gradients will be computed for this tensor during
-        backprop
+        :param z: The parameter `z` is a numerical input that is used as an input to the neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed for this tensor during backprop
         :return: The function `get_cass` returns the value of `cass` as a NumPy array.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -1602,11 +1412,8 @@ class Particle2DNeural(Particle2DIMR):
         The function `get_L` takes a tensor `z`, passes it through a neural network `L_net`, and returns the
         output `L` as a numpy array.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural
-        network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The
-        `requires_grad=True` argument indicates that gradients will be computed with respect
-        :return: the value of L, which is obtained by passing the input z through the L_net neural network
-        and converting the result to a numpy array.
+        :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. 
+        :return: the value of L, which is obtained by passing the input z through the L_net neural network and converting the result to a numpy array.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
         L = self.L_net(z_tensor).detach().numpy()[0]
@@ -1617,9 +1424,7 @@ class Particle2DNeural(Particle2DIMR):
         The function `get_E` takes a parameter `z`, converts it to a tensor, passes it through a neural
         network called `energy_net`, and returns the resulting energy value.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural
-        network. It is converted to a tensor using `torch.tensor` and is set to have a data type of
-        `torch.float32`. The `requires_grad=True` argument indicates that gradients will
+        :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural network. It is converted to a tensor using `torch.tensor` and is set to have a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will
         :return: the value of E, which is the output of the energy_net model when given the input z.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -1630,8 +1435,7 @@ class Particle2DNeural(Particle2DIMR):
         """
         The function `m_new` calculates new values for `r` and `p` using the `fsolve` function and returns
         the updated values.
-        :return: a tuple containing two tuples. The first tuple contains the values of `self.r[0]` and
-        `self.r[1]`, and the second tuple contains the values of `self.p[0]` and `self.p[1]`.
+        :return: a tuple containing two tuples. The first tuple contains the values of `self.r[0]` and `self.r[1]`, and the second tuple contains the values of `self.p[0]` and `self.p[1]`.
         """
         #calculate
         (self.r[0], self.r[1], self.p[0], self.p[1])= fsolve(self.f, (self.r[0], self.r[1], self.p[0], self.p[1]))
@@ -1643,23 +1447,13 @@ class ShivamoggiIMR(object):
         """
         The function initializes the variables M, dt, alpha, init_rx, init_ry, init_rz, and init_u.
         
-        :param M: The parameter M represents the mass of the system. It is used in the Hamiltonian equation
-        to calculate the kinetic energy term, which is given by 1/2 p^2/M, where p is the momentum of the
-        system
-        :param dt: dt is the time step size used in numerical integration methods to update the system's
-        state. It determines the granularity of the simulation and affects the accuracy and stability of the
-        calculations. Smaller values of dt result in more accurate but slower simulations, while larger
-        values of dt can lead to faster but less accurate
-        :param alpha: The parameter alpha represents the strength of the harmonic potential in the
-        Hamiltonian. It determines how tightly the particle is confined in the potential well. A larger
-        value of alpha corresponds to a stronger confinement
+        :param M: The parameter M represents the mass of the system. It is used in the Hamiltonian equation to calculate the kinetic energy term, which is given by 1/2 p^2/M, where p is the momentum of the system
+        :param dt: dt is the time step size used in numerical integration methods to update the system's state. It determines the granularity of the simulation and affects the accuracy and stability of the calculations. Smaller values of dt result in more accurate but slower simulations, while larger values of dt can lead to faster but less accurate
+        :param alpha: The parameter alpha represents the strength of the harmonic potential in the Hamiltonian. It determines how tightly the particle is confined in the potential well. A larger value of alpha corresponds to a stronger confinement
         :param init_rx: The initial x-coordinate of the particle's position
-        :param init_ry: The parameter `init_ry` represents the initial value of the y-coordinate of the
-        position vector
-        :param init_rz: The parameter `init_rz` represents the initial value of the z-coordinate of the
-        position vector
-        :param init_u: The `init_u` parameter represents the initial momentum of the system. It is a vector
-        that specifies the initial momentum in each direction (x, y, z)
+        :param init_ry: The parameter `init_ry` represents the initial value of the y-coordinate of the position vector
+        :param init_rz: The parameter `init_rz` represents the initial value of the z-coordinate of the position vector
+        :param init_u: The `init_u` parameter represents the initial momentum of the system. It is a vector that specifies the initial momentum in each direction (x, y, z)
         """
         self.M = M #Hamiltonian = 1/2 p^2/M + 1/2 alpha r^2
         self.u = init_u
@@ -1681,8 +1475,7 @@ class ShivamoggiIMR(object):
         The function `get_UV` takes a list `m` as input and returns two tuples (U and V) based on the values in `m`.
         
         :param m: The parameter `m` is a list containing four elements: `u`, `x`, `y`, and `z`
-        :return: The function `get_UV` returns a tuple of two tuples. The first tuple contains three values:
-        0.0, 2*u*(x+z), and 0.0. The second tuple contains three values: x, 0, and -z.
+        :return: The function `get_UV` returns a tuple of two tuples. The first tuple contains three values: 0.0, 2*u*(x+z), and 0.0. The second tuple contains three values: x, 0, and -z.
         """
         u = m[0]
         x = m[1]
@@ -1739,21 +1532,13 @@ class ShivamoggiIMR(object):
         """
         The function initializes the variables M, dt, alpha, init_rx, init_ry, init_rz, and init_u.
         
-        :param M: The parameter M represents the mass of the system. It is used in the Hamiltonian equation
-        to calculate the kinetic energy term, which is given by 1/2 p^2/M, where p is the momentum of the
-        system
-        :param dt: dt is the time step size used in numerical integration methods to update the system's
-        state. It determines the granularity of the simulation and affects the accuracy and stability of the
-        calculations. Smaller values of dt result in more accurate but slower simulations, while larger
-        values of dt can lead to faster but less accurate
+        :param M: The parameter M represents the mass of the system. It is used in the Hamiltonian equation to calculate the kinetic energy term, which is given by 1/2 p^2/M, where p is the momentum of the system
+        :param dt: dt is the time step size used in numerical integration methods to update the system's state. It determines the granularity of the simulation and affects the accuracy and stability of the calculations. Smaller values of dt result in more accurate but slower simulations, while larger values of dt can lead to faster but less accurate
         :param alpha: A parameter in the Shivamoggi equations
         :param init_rx: The initial x-coordinate of the particle's position
-        :param init_ry: The parameter `init_ry` represents the initial value of the y-coordinate of the
-        position vector
-        :param init_rz: The parameter `init_rz` represents the initial value of the z-coordinate of the
-        position vector
-        :param init_u: The `init_u` parameter represents the initial momentum of the system. It is a vector
-        that specifies the initial momentum in each direction (x, y, z)
+        :param init_ry: The parameter `init_ry` represents the initial value of the y-coordinate of the position vector
+        :param init_rz: The parameter `init_rz` represents the initial value of the z-coordinate of the position vector
+        :param init_u: The `init_u` parameter represents the initial momentum of the system. It is a vector that specifies the initial momentum in each direction (x, y, z)
         """
         self.M = M #Hamiltonian = 1/2 p^2/M + 1/2 alpha r^2
         self.u = init_u
@@ -1777,8 +1562,7 @@ class ShivamoggiIMR(object):
         calculated based on the value of `x` and `z` from `m`.
         
         :param m: The parameter `m` is a list containing four elements: `u`, `x`, `y`, and `z`
-        :return: The function `get_UV` returns a tuple of two tuples. The first tuple contains three values:
-        0.0, 2*u*(x+z), and 0.0. The second tuple contains three values: x, 0, and -z.
+        :return: The function `get_UV` returns a tuple of two tuples. The first tuple contains three values: 0.0, 2*u*(x+z), and 0.0. The second tuple contains three values: x, 0, and -z.
         """
         u = m[0]
         x = m[1]
@@ -1806,8 +1590,7 @@ class ShivamoggiIMR(object):
         The function `f` calculates the residual of a given input `mNew` by performing a series of
         mathematical operations.
         
-        :param mNew: The parameter `mNew` is a list or array containing the new values for `u`, `x[0]`,
-        `x[1]`, and `x[2]`
+        :param mNew: The parameter `mNew` is a list or array containing the new values for `u`, `x[0]`, `x[1]`, and `x[2]`
         :return: a tuple containing the values of mres[0], mres[1], mres[2], and mres[3].
         """
         mOld = np.array([self.u, self.x[0], self.x[1], self.x[2]])
@@ -1837,25 +1620,15 @@ class ShivamoggiNeural(ShivamoggiIMR):
         appropriate neural network models based on the chosen method.
         
         :param M: The parameter M represents the mass of the system. It is a scalar value
-        :param dt: The parameter `dt` represents the time step size in the simulation. It determines how
-        much time elapses between each iteration of the simulation
+        :param dt: The parameter `dt` represents the time step size in the simulation. It determines how much time elapses between each iteration of the simulation
         :param alpha: The parameter "alpha" is a value used in the ShivamoggiNeural class initialization. It
-        is a scalar value that represents a coefficient used in the calculations performed by the class. The
-        specific purpose and meaning of this parameter may depend on the context and implementation of the
-        Shivamoggi equations
-        :param init_rx: The parameter `init_rx` is the initial x-coordinate of the position vector. It
-        represents the starting position of the object in the x-direction
-        :param init_ry: The parameter `init_ry` represents the initial value for the y-coordinate of the
-        position vector. It is used in the initialization of the `ShivamoggiNeural` class
-        :param init_rz: The parameter `init_rz` represents the initial value for the z-coordinate of the
-        position vector. It is used in the initialization of the `ShivamoggiNeural` class
-        :param init_u: The parameter `init_u` represents the initial value of the variable `u` in the
-        ShivamoggiNeural class. It is used to initialize the state of the system
-        :param method: The "method" parameter in the code snippet refers to the method used for solving the
-        Shivamoggi equations. There are three possible options:, defaults to without (optional)
-        :param name: The `name` parameter is a string that represents the folder name where the saved models
-        are located. It is used to load the pre-trained neural network models for energy and L (Lagrangian)
-        calculations. The `name` parameter is used to construct the file paths for loading the models
+        is a scalar value that represents a coefficient used in the calculations performed by the class. The specific purpose and meaning of this parameter may depend on the context and implementation of the Shivamoggi equations
+        :param init_rx: The parameter `init_rx` is the initial x-coordinate of the position vector. It represents the starting position of the object in the x-direction
+        :param init_ry: The parameter `init_ry` represents the initial value for the y-coordinate of the position vector. It is used in the initialization of the `ShivamoggiNeural` class
+        :param init_rz: The parameter `init_rz` represents the initial value for the z-coordinate of the position vector. It is used in the initialization of the `ShivamoggiNeural` class
+        :param init_u: The parameter `init_u` represents the initial value of the variable `u` in the ShivamoggiNeural class. It is used to initialize the state of the system
+        :param method: The "method" parameter in the code snippet refers to the method used for solving the Shivamoggi equations. There are three possible options:, defaults to without (optional)
+        :param name: The `name` parameter is a string that represents the folder name where the saved models are located. It is used to load the pre-trained neural network models for energy and L (Lagrangian) calculations. The `name` parameter is used to construct the file paths for loading the models
         """
         super(ShivamoggiNeural, self).__init__(M, dt, alpha, init_rx,  init_ry, init_rz, init_u)
         # Load network
@@ -1889,8 +1662,7 @@ class ShivamoggiNeural(ShivamoggiIMR):
         The function `neural_zdot` calculates the Hamiltonian of a neural network given a set of input
         values.
         
-        :param z: The parameter `z` is a tensor representing the input to the neural network. It is of type
-        `torch.Tensor` and has a shape determined by the dimensions of the input data
+        :param z: The parameter `z` is a tensor representing the input to the neural network. It is of type `torch.Tensor` and has a shape determined by the dimensions of the input data
         :return: The function `neural_zdot` returns the variable `hamiltonian`.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -1914,10 +1686,8 @@ class ShivamoggiNeural(ShivamoggiIMR):
         The function `f` calculates the difference between the old and new values of `m` and adds the
         product of the time step and the derivative of `z` to it.
         
-        :param mNew: The parameter `mNew` represents the new values of `m` that are passed to the function
-        `f`
-        :return: the difference between the old values and the new values, plus the product of the time step
-        and the derivative of the neural network with respect to the midpoint of the old and new values.
+        :param mNew: The parameter `mNew` represents the new values of `m` that are passed to the function `f`
+        :return: the difference between the old values and the new values, plus the product of the time step and the derivative of the neural network with respect to the midpoint of the old and new values.
         """
         mOld = np.array([self.u, self.x[0], self.x[1], self.x[2]])
         m_mid = 0.5*(np.array(mNew)+mOld)
@@ -1931,10 +1701,7 @@ class ShivamoggiNeural(ShivamoggiIMR):
         The function `get_cass` takes in a parameter `z`, converts it to a tensor, passes it through a
         neural network `J_net`, and returns the output `cass` as a numpy array.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the neural network. It
-        is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The
-        `requires_grad=True` argument indicates that gradients will be computed for this tensor during
-        backprop
+        :param z: The parameter `z` is a numerical input that is used as an input to the neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed for this tensor during backprop
         :return: the value of `cass` as a NumPy array.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -1946,11 +1713,8 @@ class ShivamoggiNeural(ShivamoggiIMR):
         The function `get_L` takes a tensor `z`, passes it through a neural network `L_net`, and returns the
         output `L` as a numpy array.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural
-        network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The
-        `requires_grad=True` argument indicates that gradients will be computed with respect
-        :return: the value of L, which is obtained by passing the input z through the L_net neural network
-        and converting the result to a numpy array.
+        :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed with respect
+        :return: the value of L, which is obtained by passing the input z through the L_net neural network and converting the result to a numpy array.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
         L = self.L_net(z_tensor).detach().numpy()[0]
@@ -1961,9 +1725,7 @@ class ShivamoggiNeural(ShivamoggiIMR):
         The function `get_E` takes a parameter `z`, converts it to a tensor, passes it through a neural
         network called `energy_net`, and returns the resulting energy value.
         
-        :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural
-        network. It is converted to a tensor using `torch.tensor` and is set to have a data type of
-        `torch.float32`. The `requires_grad=True` argument indicates that gradients will
+        :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural network. It is converted to a tensor using `torch.tensor` and is set to have a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will
         :return: the value of E, which is the output of the energy_net model when given the input z.
         """
         z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
@@ -1974,6 +1736,7 @@ class ShivamoggiNeural(ShivamoggiIMR):
         """
         The function `m_new` returns the values of `u`, `x[0]`, `x[1]`, and `x[2]` after solving the
         equation `f` using the `fsolve` function.
+
         :return: a tuple containing the values of self.u, self.x[0], self.x[1], and self.x[2].
         """
         #calculate

@@ -11,14 +11,10 @@ class EnergyNet(nn.Module):
         The function initializes a neural network with a specified number of dimensions, neurons,
         layers, and batch size.
         
-        :param dim: The `dim` parameter represents the dimensionality of the input data. It specifies
-        the number of features or variables in the input data
-        :param neurons: The "neurons" parameter represents the number of neurons in each hidden layer of
-        the neural network
-        :param layers: The "layers" parameter represents the number of hidden layers in the neural
-        network
-        :param batch_size: The batch size is the number of samples that will be propagated through the
-        network at once. It is used to divide the dataset into smaller batches for efficient training
+        :param dim: The `dim` parameter represents the dimensionality of the input data. It specifies the number of features or variables in the input data
+        :param neurons: The "neurons" parameter represents the number of neurons in each hidden layer of the neural network
+        :param layers: The "layers" parameter represents the number of hidden layers in the neural network
+        :param batch_size: The batch size is the number of samples that will be propagated through the network at once. It is used to divide the dataset into smaller batches for efficient training
         """
         super(EnergyNet, self).__init__()
         self.dim = dim
@@ -38,10 +34,7 @@ class EnergyNet(nn.Module):
         The forward function takes an input x, applies a series of dense and activation layers, and
         returns the output.
         
-        :param x: The parameter `x` represents the input to the neural network. It is passed through the
-        input dense layer, followed by a softplus activation function. Then, it is passed through a
-        series of hidden layers, each followed by a softplus activation function. Finally, the output is
-        obtained by passing the
+        :param x: The parameter `x` represents the input to the neural network. It is passed through the input dense layer, followed by a softplus activation function. Then, it is passed through a series of hidden layers, each followed by a softplus activation function. Finally, the output is obtained by passing through the output layer.
         :return: The output of the forward pass through the neural network model.
         """
         x = self.inputDense(x)
@@ -60,15 +53,10 @@ class TensorNet(nn.Module):
         The function initializes a neural network with a specified number of dimensions, neurons, layers,
         and batch size, and sets up the necessary linear layers and indices for the network.
         
-        :param dim: The "dim" parameter represents the dimensionality of the input data. It specifies the
-        number of features or variables in the input data
-        :param neurons: The "neurons" parameter represents the number of neurons in each hidden layer of
-        the neural network
-        :param layers: The "layers" parameter represents the number of hidden layers in the neural
-        network
-        :param batch_size: The batch_size parameter determines the number of samples that will be
-        processed in each forward pass of the neural network. It represents the number of input data
-        points that will be fed into the network simultaneously
+        :param dim: The "dim" parameter represents the dimensionality of the input data. It specifies the number of features or variables in the input data
+        :param neurons: The "neurons" parameter represents the number of neurons in each hidden layer of the neural network
+        :param layers: The "layers" parameter represents the number of hidden layers in the neural network
+        :param batch_size: The batch_size parameter determines the number of samples that will be processed in each forward pass of the neural network. It represents the number of input data points that will be fed into the network simultaneously
         """
         super(TensorNet, self).__init__()
         self.dim = dim
@@ -99,8 +87,7 @@ class TensorNet(nn.Module):
         The forward function takes an input tensor, applies a series of operations including dense layers
         and activation functions, and returns an output tensor.
         
-        :param x: The parameter `x` is the input to the forward function. It is passed through a series
-        of layers and transformations to produce the output
+        :param x: The parameter `x` is the input to the forward function. 
         :return: the variable "output".
         """
 
@@ -131,15 +118,10 @@ class JacVectorNet(nn.Module):
         which takes in parameters for the dimensions, number of neurons, number of layers, and batch size,
         and sets up the layers and linear transformations for the model.
         
-        :param dim: The "dim" parameter represents the dimensionality of the input data. In this case, it
-        is not explicitly used in the code snippet provided. It is possible that it is used elsewhere in
-        the code or in the implementation of the JacVectorNet class
-        :param neurons: The "neurons" parameter represents the number of neurons in each hidden layer of
-        the neural network
+        :param dim: The "dim" parameter represents the dimensionality of the input data. In this case, it is not explicitly used in the code snippet provided. 
+        :param neurons: The "neurons" parameter represents the number of neurons in each hidden layer of the neural network
         :param layers: The "layers" parameter represents the number of hidden layers in the neural network
-        :param batch_size: The batch_size parameter determines the number of samples that will be
-        processed in each forward and backward pass during training. It is used to divide the dataset into
-        smaller batches to improve efficiency and memory usage
+        :param batch_size: The batch_size parameter determines the number of samples that will be processed in each forward and backward pass during training.
         """
         super(JacVectorNet, self).__init__()
         self.dim = dim
@@ -162,8 +144,7 @@ class JacVectorNet(nn.Module):
         product of the output and the gradient of the Cassimir term with respect to the input, as well as
         the Cassimir term itself.
         
-        :param inp: The `inp` parameter represents the input to the forward method. It is the input data
-        that will be passed through the neural network
+        :param inp: The `inp` parameter represents the input to the forward method. It is the input data that will be passed through the neural network
         :return: two values: `multi * cass_grad` and `cass`.
         """
 
