@@ -38,3 +38,9 @@ Check training error and errors while learning.
 ## Typical arguments used for the training can be found in folder 
 
     typical_args
+
+## More detailed documentation can be found at
+    [link](www.karlin.mff.cuni.cz:~/pavelka/direct-poisson-neural-networks)
+
+    <a href="www.karlin.mff.cuni.cz:~/pavelka/direct-poisson-neural-networks">link</a>
+    
