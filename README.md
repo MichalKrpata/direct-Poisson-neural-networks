@@ -39,7 +39,5 @@ Check training error and errors while learning.
 
     typical_args
 
-## More detailed documentation can be found at
-
-    www.karlin.mff.cuni.cz:~/pavelka/direct-poisson-neural-networks
+## More detailed documentation can be found [here](www.karlin.mff.cuni.cz/~pavelka/direct-poisson-neural-networks)
     
