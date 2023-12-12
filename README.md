@@ -40,3 +40,5 @@ Check training error and errors while learning.
     typical_args
 
 More detailed documentation can be found [here](https://www.karlin.mff.cuni.cz/~pavelka/direct-poisson-neural-networks/)
+
+Please cite as [M. Šípka, M. Pavelka, O. Esen, and M. Grmela, Direct Poisson neural networks: learning non-symplectic mechanical systems, Journal of Physics A: Mathematical and Theoretical 56(49), 2023.](https://iopscience.iop.org/article/10.1088/1751-8121/ad0803)
