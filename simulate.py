@@ -16,6 +16,77 @@ def save_simulation(data_frame, file_name): #save data to file_name
     """
     print("Storing to: ", file_name, "\n")
     data_frame.to_csv(file_name)
+
+"""def run_simulation_gpu(solver, initial_m, initial_r, model_type, steps):
+    ""
+    Runs the entire simulation on the GPU, replicating the model-specific logic
+    of the original loop for maximum performance.
+    ""
+    device = solver.device
+    dt = solver.dt
+
+    if model_type in ["RB", "Sh"]:
+        z_initial = initial_m
+        dim_m, dim_r = len(initial_m), 0
+    elif model_type == "HT":
+        z_initial = np.concatenate([initial_m, initial_r])
+        dim_m, dim_r = len(initial_m), len(initial_r)
+    elif model_type in ["P3D", "K3D", "P2D"]:
+        z_initial = np.concatenate([initial_r, initial_m])
+        dim_m, dim_r = len(initial_m), len(initial_r)
+    else:
+        raise Exception(f"Unknown model: {model_type}")
+
+    z_dim = len(z_initial)
+    z_initial_gpu = torch.tensor(z_initial, dtype=torch.float32, device=device)
+
+    z_trajectory_gpu = torch.zeros((steps, z_dim), dtype=torch.float32, device=device)
+    z_trajectory_gpu[0] = z_initial_gpu
+
+    z_current_gpu = z_initial_gpu
+    for i in range(1, steps):
+        z_current_gpu = solver._solver_step_gpu(z_current_gpu)
+        z_trajectory_gpu[i] = z_current_gpu
+
+    ts = torch.arange(steps, device=device) * dt
+    
+    Es_gpu = solver.energy_net(z_trajectory_gpu).detach().squeeze()
+    Ls_gpu = solver.L_net(z_trajectory_gpu).detach().squeeze()
+    
+    casss_gpu = torch.zeros(steps, device=device)
+    if solver.method == "implicit":
+        _, casss_gpu = solver.J_net(z_trajectory_gpu)
+        casss_gpu = casss_gpu.detach().squeeze()
+
+    if model_type in ["RB", "Sh"]:
+        ms_gpu = z_trajectory_gpu
+        rs_gpu = None # No r component
+    elif model_type == "HT":
+        ms_gpu = z_trajectory_gpu[:, :dim_m]
+        rs_gpu = z_trajectory_gpu[:, dim_m:]
+    elif model_type in ["P3D", "K3D", "P2D"]:
+        rs_gpu = z_trajectory_gpu[:, :dim_r]
+        ms_gpu = z_trajectory_gpu[:, dim_r:]
+
+    msqs_gpu = torch.sum(ms_gpu * ms_gpu, dim=1)
+    
+    mrs_gpu = rsqs_gpu = None
+    if rs_gpu is not None:
+        mrs_gpu = torch.sum(ms_gpu * rs_gpu, dim=1)
+        rsqs_gpu = torch.sum(rs_gpu * rs_gpu, dim=1)
+
+    results = {
+        "ts": ts.cpu().numpy(),
+        "ms": ms_gpu.detach().cpu().numpy(),
+        "Es": Es_gpu.cpu().numpy(),
+        "Ls": Ls_gpu.cpu().numpy(),
+        "msqs": msqs_gpu.detach().cpu().numpy(),
+        "casss": casss_gpu.cpu().numpy(),
+        "rs": rs_gpu.detach().cpu().numpy() if rs_gpu is not None else None,
+        "mrs": mrs_gpu.detach().cpu().numpy() if mrs_gpu is not None else None,
+        "rsqs": rsqs_gpu.detach().cpu().numpy() if rsqs_gpu is not None else None,
+    }
+    return results"""
  
 def simulate(args, method = "normal"): #simulate with args given below 
     """
@@ -31,22 +102,24 @@ def simulate(args, method = "normal"): #simulate with args given below
                     
     ts, ms, msqs, Ls, Es, casss, rs, mrs, rsqs = [], [], [], [], [], [], [], [], []
 
+    device = torch.device("cuda" if torch.cuda.is_available() and args.cuda  and args.simulate_cuda else "cpu")
+
     if args.model == "RB": # Rigid body
         if method == "implicit":
             if args.scheme == "IMR":
-                solver = RBNeuralIMR(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha, method = "implicit", name = args.folder_name)
+                solver = RBNeuralIMR(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha, method = "implicit", name = args.folder_name, device=device)
             else:
-                solver = Neural(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha, method = "implicit", name = args.folder_name)
+                solver = Neural(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha, method = "implicit", name = args.folder_name, device=device)
         elif method == "soft":
             if args.scheme == "IMR":
-                solver = RBNeuralIMR(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha, method = "soft", name = args.folder_name)
+                solver = RBNeuralIMR(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha, method = "soft", name = args.folder_name, device=device)
             else:
-                solver = Neural(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha, method = "soft", name = args.folder_name)
+                solver = Neural(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha, method = "soft", name = args.folder_name, device=device)
         elif method == "without":
             if args.scheme == "IMR":
-                solver = RBNeuralIMR(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha, method = "without", name = args.folder_name)
+                solver = RBNeuralIMR(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha, method = "without", name = args.folder_name, device=device)
             else:
-                solver = Neural(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha, method = "without", name = args.folder_name)
+                solver = Neural(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha, method = "without", name = args.folder_name, device=device)
         elif method =="normal":
             if args.scheme == "Eh":
                 solver = RBEhrenfest(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha)
@@ -56,6 +129,8 @@ def simulate(args, method = "normal"): #simulate with args given below
                 solver = RBESeReFE(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.alpha)
             elif args.scheme == "IMR":
                 solver = RBIMR(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt)
+            elif args.scheme == "RK4": 
+                solver = RBRK4(args.Ix,args.Iy,args.Iz, d2E, args.init_mx,args.init_my,args.init_mz,args.dt,args.M_tau)
             else:
                 raise Exception("Unknown scheme.")
         else:
@@ -273,7 +348,7 @@ def simulate(args, method = "normal"): #simulate with args given below
             print(i/args.steps*100, "%")
             print("|m| = ", np.linalg.norm(m))
             print("E = ", 0.5 * m @ d2E @ m)
-            
+    
     ts = np.array(ts[1:]).reshape(-1,1)
 
     ms_old = np.array(ms[:-1])
@@ -287,6 +362,23 @@ def simulate(args, method = "normal"): #simulate with args given below
     rs = np.array(rs[1:])
     mrs = np.array(mrs[1:]).reshape(-1,1)
     rsqs = np.array(rsqs[1:]).reshape(-1,1)
+    
+    # won't use
+    """else:
+        results = run_simulation_gpu(solver, m, r, args.model, args.steps)
+
+        ts = results["ts"][1:].reshape(-1, 1)
+        ms_old = results["ms"][:-1]
+        ms = results["ms"][1:]
+        msqs = results["msqs"][1:].reshape(-1, 1)
+        Ls = results["Ls"][1:]
+        Es = results["Es"][1:].reshape(-1, 1)
+        casss = results["casss"][1:].reshape(-1, 1)
+        if results["rs"] is not None:
+            rs_old = results["rs"][:-1]
+            rs = results["rs"][1:]
+            mrs = results["mrs"][1:].reshape(-1, 1)
+            rsqs = results["rsqs"][1:].reshape(-1, 1)"""
 
     if method == "implicit": #returns also the Casimir
         data = np.hstack((ts, ms_old, ms, msqs, Ls[:,0,1].reshape(-1,1), Ls[:,0,2].reshape(-1,1), Ls[:,1,2].reshape(-1,1), Es, casss))
@@ -307,6 +399,10 @@ def simulate(args, method = "normal"): #simulate with args given below
         elif args.model =="Sh":
             data = np.hstack((ts, ms_old, ms, Ls[:,0,1].reshape(-1,1), Ls[:,0,2].reshape(-1,1), Ls[:,0,3].reshape(-1,1), Ls[:,1,2].reshape(-1,1), Ls[:,1,3].reshape(-1,1), Ls[:,2,3].reshape(-1,1), Es))
             return pd.DataFrame(data, columns = ["time", "old_u", "old_x", "old_y", "old_z", "u", "x",  "y", "z", "L_01", "L_02", "L_03", "L_12", "L_13", "L_23", "E"])#return results of simulation
+
+
+def simulate_batch(args, initial_states_batch, method = "normal"):
+    raise NotImplementedError("Batch simulation is not implemented yet. Please use the single simulation function.")
 
 #def get_file_name(args):
 #    if args.generate:
@@ -354,9 +450,12 @@ if __name__ == "__main__":
     parser.add_argument("--init_ry", default=-0.195090, type=float, help="Initial r, y component")
     parser.add_argument("--init_rz", default=0.980785, type=float, help="Initial r, z component")
     parser.add_argument("--M", default=10.5, type=float, help="mass")
+    parser.add_argument("--cuda", default=False, action="store_true", help="Use GPU if available")
     
 
     args = parser.parse_args([] if "__file__" not in globals() else None)
+
+    args.simulate_cuda = args.cuda
 
     #checking whether more methods are specified (error), only one is possible
     methods = 0

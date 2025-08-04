@@ -409,6 +409,55 @@ class RBIMR(RigidBody):#implicit midpoint
         return m_new
 
 
+class RBRK4(RigidBody):
+    def __init__(self, Ix, Iy, Iz, d2E, mx, my, mz, dt, tau):
+        """
+        The function initializes an instance of the RBRK4 class with given parameters.
+        
+        :param Ix: The moment of inertia about the x-axis
+        :param Iy: The parameter "Iy" represents the moment of inertia about the y-axis. It is a measure of an object's resistance to changes in rotation about the y-axis
+        :param Iz: The parameter "Iz" represents the moment of inertia about the z-axis. It is a measure of an object's resistance to changes in its rotational motion about the z-axis
+        :param d2E: The parameter "d2E" likely represents the second derivative of the energy function. It could be a function or a value that represents the rate of change of energy with respect to time
+        :param mx: The parameter "mx" represents the x-component of the moment of inertia
+        :param my: The parameter "my" represents the moment of inertia about the y-axis
+        :param mz: The parameter "mz" represents the moment of inertia about the z-axis
+        :param dt: The parameter "dt" represents the time step or time interval between each iteration or calculation in the RBRK4 class.
+        """
+        super(RBRK4, self).__init__(Ix, Iy, Iz, d2E, mx, my, mz, dt, 0.0)
+        self.tau = tau
+
+    def m_dot(self,m):
+        LdH = self.get_L(m)@self.d2E @ m
+        M = 0.5*self.get_L(m) @ self.d2E @ LdH
+        
+        return LdH + self.tau*M
+
+
+
+    def m_new(self, with_entropy = False):
+        """
+        The function `m_new` calculates and returns new values for `mx`, `my`, and `mz`, and updates the
+        corresponding variables in the class.
+        
+        :param with_entropy: The "with_entropy" parameter is a boolean flag that determines whether or not to include entropy in the calculation of the new value of m. If set to True, entropy will be considered in the calculation. If set to False, entropy will not be considered, defaults to False (optional)
+        :return: the updated values of mx, my, and mz as a tuple.
+        """
+        #calculate
+        m = [self.mx, self.my, self.mz]
+        k1 = self.m_dot(m)
+        k2 = self.m_dot(m + self.dt*k1/2)
+        k3 = self.m_dot(m + self.dt*k2/2)
+        k4 = self.m_dot(m + self.dt*k3)
+        m_new = m + self.dt/6*(k1 + 2*k2 + 2*k3 + k4)
+
+        #update
+        self.mx = m_new[0]
+        self.my = m_new[1]
+        self.mz = m_new[2]
+
+        return m_new
+
+
 class RBESeReFE(RigidBody):#SeRe forward Euler
     def __init__(self, Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha):
         """
@@ -462,7 +511,7 @@ class RBESeReFE(RigidBody):#SeRe forward Euler
         return m
 
 class Neural(RigidBody):#SeRe forward Euler
-    def __init__(self, Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha, method = "without", name = DEFAULT_folder_name):
+    def __init__(self, Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha, method = "without", name = DEFAULT_folder_name, device = "cpu"):
         """
         The function initializes a Neural object with specified parameters and loads a pre-trained neural
         network based on the chosen method.
@@ -483,19 +532,19 @@ class Neural(RigidBody):#SeRe forward Euler
         # Load network
         self.method = method
         if method == "soft":
-            self.energy_net = torch.load(name+'/saved_models/soft_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/soft_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()   
-            self.L_net = torch.load(name+'/saved_models/soft_jacobi_L')
+            self.L_net = torch.load(name+'/saved_models/soft_jacobi_L', weights_only=False)  # changed weights_only=False
             self.L_net.eval()
         elif method == "without":
-            self.energy_net = torch.load(name+'/saved_models/without_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/without_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()   
-            self.L_net = torch.load(name+'/saved_models/without_jacobi_L')
+            self.L_net = torch.load(name+'/saved_models/without_jacobi_L', weights_only=False)  # changed weights_only=False
             self.L_net.eval()
         elif method == "implicit":
-            self.energy_net = torch.load(name+'/saved_models/implicit_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/implicit_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()
-            self.J_net = torch.load(name+'/saved_models/implicit_jacobi_J')
+            self.J_net = torch.load(name+'/saved_models/implicit_jacobi_J', weights_only=False)  # changed weights_only=False
             self.J_net.eval()
             def L_net(z):
                 L = -1*torch.tensor([[[0.0, z[2], -z[1]],[-z[2], 0.0, z[0]],[z[1], -z[0], 0.0]]])
@@ -503,6 +552,11 @@ class Neural(RigidBody):#SeRe forward Euler
             self.L_net = L_net
         else:
             raise Exception("Unkonown method: ", method)
+
+        self.device = device
+        self.energy_net.to(self.device)
+        if hasattr(self, 'L_net') and isinstance(self.L_net, torch.nn.Module): self.L_net.to(self.device)
+        if hasattr(self, 'J_net'): self.J_net.to(self.device)
 
     # Get gradient of energy from NN
     def neural_zdot(self, z):
@@ -513,19 +567,19 @@ class Neural(RigidBody):#SeRe forward Euler
         :param z: The parameter `z` is the input to the `neural_zdot` function. It is a tensor or array that represents the input data for the neural network.
         :return: the hamiltonian, which is a numpy array.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
         En = self.energy_net(z_tensor)
 
         E_z = torch.autograd.grad(En.sum(), z_tensor, only_inputs=True)[0]
         E_z = torch.flatten(E_z)
 
         if self.method == "soft" or self.method == "without":
-            L = self.L_net(z_tensor).detach().numpy()[0]
-            hamiltonian = np.matmul(L, E_z.detach().numpy())
+            L = self.L_net(z_tensor).detach().cpu().numpy()[0]
+            hamiltonian = np.matmul(L, E_z.detach().cpu().numpy())
         else:
             J, cass = self.J_net(z_tensor)
-            J = J.detach().numpy()
-            hamiltonian = np.cross(J, E_z.detach().numpy())
+            J = J.detach().cpu().numpy()
+            hamiltonian = np.cross(J, E_z.detach().cpu().numpy())
 
         return hamiltonian
 
@@ -554,9 +608,9 @@ class Neural(RigidBody):#SeRe forward Euler
         :param z: The parameter `z` is a numerical input that is used as an input to the neural network `J_net`. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32` and `requires_grad` set to `True`. The `requires_grad` flag
         :return: the value of `cass` as a NumPy array.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
         J, cass = self.J_net(z_tensor)
-        return cass.detach().numpy()
+        return cass.detach().cpu().numpy()
 
     def get_L(self, z):
         """
@@ -566,8 +620,8 @@ class Neural(RigidBody):#SeRe forward Euler
         :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed for this
         :return: the value of L, which is obtained by passing the input z through the L_net neural network and converting the result to a numpy array.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
-        L = self.L_net(z_tensor).detach().numpy()[0]
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
+        L = self.L_net(z_tensor).detach().cpu().numpy()[0]
         return L
 
     def get_E(self, z):
@@ -578,30 +632,93 @@ class Neural(RigidBody):#SeRe forward Euler
         :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural network. It is converted to a tensor using `torch.tensor` and is set to have a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will
         :return: the value of E, which is the output of the energy_net model when given the input z.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
-        E = self.energy_net(z_tensor).detach().numpy()[0]
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
+        E = self.energy_net(z_tensor).detach().cpu().numpy()[0]
         return E
 
-    def m_new(self, with_entropy = False): #return new m and update RB
-        """
+    # original implementation of m_new
+    """def m_new(self, with_entropy = False): #return new m and update RB
+        ""
         The function `m_new` calculates new values for `mx`, `my`, and `mz` using the `fsolve` function and
         updates the corresponding variables.
         
         :param with_entropy: The parameter "with_entropy" is a boolean flag that determines whether or not to include entropy in the calculation of the new value of m. If it is set to True, entropy will be considered in the calculation. If it is set to False, entropy will not be considered, defaults to False (optional)
         :return: the updated values of mx, my, and mz as a tuple.
-        """
+        ""
         #calculate
         m_new = fsolve(self.f, (self.mx, self.my, self.mz))
 
-#       update
+        # update
         self.mx = m_new[0]
         self.my = m_new[1]
         self.mz = m_new[2]
 
-        return m_new
+        return m_new"""
+    
+    def _hamiltonian(self, z_tensor):
+        z_tensor.requires_grad_(True)
+        En = self.energy_net(z_tensor).squeeze(0)
+        
+        E_z = torch.autograd.grad(En.sum(), z_tensor, create_graph=True)[0]
+        
+        if self.method == "soft" or self.method == "without":
+            L = self.L_net(z_tensor).squeeze(0)
+            hamiltonian = torch.matmul(L, E_z.unsqueeze(-1)).squeeze(-1)
+        else: # "implicit"
+            J, cass = self.J_net(z_tensor)
+            J = J.squeeze(0)
+            cass = cass.squeeze(0)
+            hamiltonian = torch.cross(J, E_z, dim=-1)
+            
+        return hamiltonian
+    
+    def m_new(self, with_entropy=False, solver_iterations=100, tol=1.5e-8):
+        m_old = torch.tensor([self.mx, self.my, self.mz], dtype=torch.float32, device=self.device)
+        m_new = m_old.clone()
+
+        zd_old = self._hamiltonian(m_old)
+
+        for _ in range(solver_iterations):
+            m_prev = m_new.clone()
+
+            zd_new = self._hamiltonian(m_prev)
+            m_new = m_old + 0.5 * self.dt * (zd_old + zd_new)
+
+            diff = torch.norm(m_new - m_prev)
+            denom = torch.norm(m_prev) + 1e-12
+            rel_error = diff / denom
+
+            if rel_error.item() < tol:
+                break
+
+        m_new_np = m_new.detach().cpu().numpy()
+
+        self.mx = m_new_np[0]
+        self.my = m_new_np[1]
+        self.mz = m_new_np[2]
+
+        return m_new_np
+    
+    # won't use
+    """def _solver_step_gpu(self, z_old_gpu, solver_iterations=4):
+        ""
+        Performs one step of the implicit midpoint solver on the GPU.
+        This is a stateless function.
+        
+        :param z_old_gpu: The current state tensor on the GPU.
+        :return: The next state tensor on the GPU.
+        ""
+        z_new_gpu = z_old_gpu.clone()
+
+        for _ in range(solver_iterations):
+            z_mid_gpu = 0.5 * (z_old_gpu + z_new_gpu)
+            hamiltonian_mid = self._hamiltonian(z_mid_gpu)
+            z_new_gpu = z_old_gpu + self.dt * hamiltonian_mid
+            
+        return z_new_gpu"""
 
 class RBNeuralIMR(Neural):#implicit midpoint rule
-    def __init__(self, Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha, method = "without", name = DEFAULT_folder_name):
+    def __init__(self, Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha, method = "without", name = DEFAULT_folder_name, device = "cpu"):
         """
         The above function is the constructor for a class called RBNeuralIMR, which is a subclass of another
         class.
@@ -618,7 +735,7 @@ class RBNeuralIMR(Neural):#implicit midpoint rule
         :param method: The "method" parameter is used to specify the method to be used for the calculation. The default value is set to "without", defaults to without (optional)
         :param name: The name parameter is used to specify the folder name where the results of the RBNeuralIMR class will be saved. If no name is provided, it will use the DEFAULT_folder_name
         """
-        super(RBNeuralIMR, self).__init__(Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha, method = method, name = name)
+        super(RBNeuralIMR, self).__init__(Ix, Iy, Iz, d2E, mx, my, mz, dt, alpha, method = method, name = name, device=device)
 
     def f(self, mNew):#defines the function f zero of which is sought
         """
@@ -638,6 +755,29 @@ class RBNeuralIMR(Neural):#implicit midpoint rule
 
         return (res[0], res[1], res[2])
 
+
+    def m_new(self, with_entropy = False, solver_iterations=100, tol=1.5e-8):
+        m_old = torch.tensor([self.mx, self.my, self.mz], dtype=torch.float32, device=self.device)
+        m_new = m_old.clone()
+
+        for _ in range(solver_iterations):
+            m_prev = m_new.clone()
+            m_mid = 0.5 * (m_old + m_prev)
+            m_mid.requires_grad_(True)
+
+            hamiltonian = self._hamiltonian(m_mid)
+            m_new = m_old + self.dt * hamiltonian
+
+            diff = torch.norm(m_new - m_prev)
+            denom = torch.norm(m_prev) + 1e-12
+            rel_error = diff / denom
+
+            if rel_error.item() < tol:
+                break
+        
+        m_new_np = m_new.detach().cpu().numpy()
+        self.mx, self.my, self.mz = m_new_np.tolist()
+        return m_new_np
 
 
 class HeavyTopCN(RigidBody): #Crank-Nicolson
@@ -798,20 +938,20 @@ class HeavyTopNeural(HeavyTopCN):
         # Load network
         self.method = method
         if method == "soft":
-            self.energy_net = torch.load(name+'/saved_models/soft_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/soft_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()   
-            self.L_net = torch.load(name+'/saved_models/soft_jacobi_L')
+            self.L_net = torch.load(name+'/saved_models/soft_jacobi_L', weights_only=False)  # changed weights_only=False
             self.L_net.eval()
         elif method == "without":
-            self.energy_net = torch.load(name+'/saved_models/without_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/without_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()   
-            self.L_net = torch.load(name+'/saved_models/without_jacobi_L')
+            self.L_net = torch.load(name+'/saved_models/without_jacobi_L', weights_only=False)  # changed weights_only=False
             self.L_net.eval()
         elif method == "implicit":
             raise Exception("Implicit solver not yet implemented for HT.")
-            self.energy_net = torch.load(name+'/saved_models/implicit_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/implicit_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()
-            self.J_net = torch.load(name+'/saved_models/implicit_jacobi_J')
+            self.J_net = torch.load(name+'/saved_models/implicit_jacobi_J', weights_only=False)  # changed weights_only=False
             self.J_net.eval()
             def L_net(z):
                 L = -1*torch.tensor([[[0.0, z[2], -z[1]],[-z[2], 0.0, z[0]],[z[1], -z[0], 0.0]]])
@@ -819,6 +959,9 @@ class HeavyTopNeural(HeavyTopCN):
             self.L_net = L_net
         else:
             raise Exception("Unkonown method: ", method)
+        self.device = next(self.energy_net.parameters()).device
+        if self.device.type == "cuda":
+            torch.cuda.current_device()
 
     # Get gradient of energy from NN
     def neural_zdot(self, z):
@@ -829,15 +972,15 @@ class HeavyTopNeural(HeavyTopCN):
         :param z: The parameter `z` is the input to the `neural_zdot` function. It is expected to be a numerical value or an array-like object that can be converted to a tensor
         :return: The function `neural_zdot` returns the variable `hamiltonian`.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
         En = self.energy_net(z_tensor)
 
         E_z = torch.autograd.grad(En.sum(), z_tensor, only_inputs=True)[0]
         E_z = torch.flatten(E_z)
 
         if self.method == "soft" or self.method == "without":
-            L = self.L_net(z_tensor).detach().numpy()[0]
-            hamiltonian = np.matmul(L, E_z.detach().numpy())
+            L = self.L_net(z_tensor).detach().cpu().numpy()[0]
+            hamiltonian = np.matmul(L, E_z.detach().cpu().numpy())
         else:
             raise Exception("Implicit not implemented for HT yet.")
             J, cass = self.J_net(z_tensor)
@@ -876,9 +1019,9 @@ class HeavyTopNeural(HeavyTopCN):
         :param z: The parameter `z` is a numerical input that is used as an input to the neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed for this tensor during backprop
         :return: the value of `cass` as a NumPy array.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
         J, cass = self.J_net(z_tensor)
-        return cass.detach().numpy()
+        return cass.detach().cpu().numpy()
 
     def get_L(self, z):
         """
@@ -888,8 +1031,8 @@ class HeavyTopNeural(HeavyTopCN):
         :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural network. It is converted to a tensor using `torch.tensor` and is set to have a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will
         :return: the value of L, which is obtained by passing the input z through the L_net neural network and converting the result to a numpy array.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
-        L = self.L_net(z_tensor).detach().numpy()[0]
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
+        L = self.L_net(z_tensor).detach().cpu().numpy()[0]
         return L
 
     def get_E(self, z):
@@ -900,8 +1043,8 @@ class HeavyTopNeural(HeavyTopCN):
         :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural network. It is converted to a tensor using `torch.tensor` and is set to have a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will
         :return: the value of E, which is the output of the energy_net model when given the input z.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
-        E = self.energy_net(z_tensor).detach().numpy()[0]
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
+        E = self.energy_net(z_tensor).detach().cpu().numpy()[0]
         return E
 
     #@tf.function
@@ -1088,20 +1231,20 @@ class Particle3DNeural(Particle3DCN):
         # Load network
         self.method = method
         if method == "soft":
-            self.energy_net = torch.load(name+'/saved_models/soft_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/soft_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()   
-            self.L_net = torch.load(name+'/saved_models/soft_jacobi_L')
+            self.L_net = torch.load(name+'/saved_models/soft_jacobi_L', weights_only=False)  # changed weights_only=False
             self.L_net.eval()
         elif method == "without":
-            self.energy_net = torch.load(name+'/saved_models/without_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/without_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()   
-            self.L_net = torch.load(name+'/saved_models/without_jacobi_L')
+            self.L_net = torch.load(name+'/saved_models/without_jacobi_L', weights_only=False)  # changed weights_only=False
             self.L_net.eval()
         elif method == "implicit":
             raise Exception("Implicit solver not yet implemented for P3D.")
-            self.energy_net = torch.load(name+'/saved_models/implicit_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/implicit_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()
-            self.J_net = torch.load(name+'/saved_models/implicit_jacobi_J')
+            self.J_net = torch.load(name+'/saved_models/implicit_jacobi_J', weights_only=False)  # changed weights_only=False
             self.J_net.eval()
             def L_net(z):
                 L = -1*torch.tensor([[[0.0, z[2], -z[1]],[-z[2], 0.0, z[0]],[z[1], -z[0], 0.0]]])
@@ -1109,6 +1252,9 @@ class Particle3DNeural(Particle3DCN):
             self.L_net = L_net
         else:
             raise Exception("Unkonown method: ", method)
+        self.device = next(self.energy_net.parameters()).device
+        if self.device.type == "cuda":
+            torch.cuda.current_device()
 
     # Get gradient of energy from NN
     def neural_zdot(self, z):
@@ -1119,15 +1265,15 @@ class Particle3DNeural(Particle3DCN):
         :param z: The parameter `z` is a tensor representing the input to the neural network. It is of type `torch.Tensor` and has a shape determined by the specific neural network architecture being used
         :return: the Hamiltonian, which is a scalar value representing the energy of the system.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
         En = self.energy_net(z_tensor)
 
         E_z = torch.autograd.grad(En.sum(), z_tensor, only_inputs=True)[0]
         E_z = torch.flatten(E_z)
 
         if self.method == "soft" or self.method == "without":
-            L = self.L_net(z_tensor).detach().numpy()[0]
-            hamiltonian = np.matmul(L, E_z.detach().numpy())
+            L = self.L_net(z_tensor).detach().cpu().numpy()[0]
+            hamiltonian = np.matmul(L, E_z.detach().cpu().numpy())
         else:
             raise Exception("Implicit not implemented for P3D yet.")
             J, cass = self.J_net(z_tensor)
@@ -1162,9 +1308,9 @@ class Particle3DNeural(Particle3DCN):
         :param z: The parameter `z` is a numerical input that is used as an input to the neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed for this tensor during backprop
         :return: the value of `cass` as a NumPy array.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
         J, cass = self.J_net(z_tensor)
-        return cass.detach().numpy()
+        return cass.detach().cpu().numpy()
 
     def get_L(self, z):
         """
@@ -1174,8 +1320,8 @@ class Particle3DNeural(Particle3DCN):
         :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed with respect
         :return: the value of L, which is obtained by passing the input z through the L_net neural network and converting the result to a numpy array.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
-        L = self.L_net(z_tensor).detach().numpy()[0]
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
+        L = self.L_net(z_tensor).detach().cpu().numpy()[0]
         return L
 
     def get_E(self, z):
@@ -1186,8 +1332,8 @@ class Particle3DNeural(Particle3DCN):
         :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural network. It is converted to a tensor using `torch.tensor` and is set to have a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will
         :return: the value of E, which is the output of the energy_net model when given the input z.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
-        E = self.energy_net(z_tensor).detach().numpy()[0]
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
+        E = self.energy_net(z_tensor).detach().cpu().numpy()[0]
         return E
 
     #@tf.function
@@ -1335,20 +1481,20 @@ class Particle2DNeural(Particle2DIMR):
         # Load network
         self.method = method
         if method == "soft":
-            self.energy_net = torch.load(name+'/saved_models/soft_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/soft_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()   
-            self.L_net = torch.load(name+'/saved_models/soft_jacobi_L')
+            self.L_net = torch.load(name+'/saved_models/soft_jacobi_L', weights_only=False)  # changed weights_only=False
             self.L_net.eval()
         elif method == "without":
-            self.energy_net = torch.load(name+'/saved_models/without_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/without_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()   
-            self.L_net = torch.load(name+'/saved_models/without_jacobi_L')
+            self.L_net = torch.load(name+'/saved_models/without_jacobi_L', weights_only=False)  # changed weights_only=False
             self.L_net.eval()
         elif method == "implicit":
             raise Exception("Implicit solver not yet implemented for P3D.")
-            self.energy_net = torch.load(name+'/saved_models/implicit_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/implicit_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()
-            self.J_net = torch.load(name+'/saved_models/implicit_jacobi_J')
+            self.J_net = torch.load(name+'/saved_models/implicit_jacobi_J', weights_only=False)  # changed weights_only=False
             self.J_net.eval()
             def L_net(z):
                 L = -1*torch.tensor([[[0.0, z[2], -z[1]],[-z[2], 0.0, z[0]],[z[1], -z[0], 0.0]]])
@@ -1356,6 +1502,9 @@ class Particle2DNeural(Particle2DIMR):
             self.L_net = L_net
         else:
             raise Exception("Unkonown method: ", method)
+        self.device = next(self.energy_net.parameters()).device
+        if self.device.type == "cuda":
+            torch.cuda.current_device()
 
     # Get gradient of energy from NN
     def neural_zdot(self, z):
@@ -1364,15 +1513,15 @@ class Particle2DNeural(Particle2DIMR):
         
         :param z: The parameter `z` is a tensor representing the input to the neural network. It is of type `torch.Tensor` and has a shape determined by the specific neural network architecture being used.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
         En = self.energy_net(z_tensor)
 
         E_z = torch.autograd.grad(En.sum(), z_tensor, only_inputs=True)[0]
         E_z = torch.flatten(E_z)
 
         if self.method == "soft" or self.method == "without":
-            L = self.L_net(z_tensor).detach().numpy()[0]
-            hamiltonian = np.matmul(L, E_z.detach().numpy())
+            L = self.L_net(z_tensor).detach().cpu().numpy()[0]
+            hamiltonian = np.matmul(L, E_z.detach().cpu().numpy())
         else:
             raise Exception("Implicit not implemented for P2D yet.")
             J, cass = self.J_net(z_tensor)
@@ -1403,9 +1552,9 @@ class Particle2DNeural(Particle2DIMR):
         :param z: The parameter `z` is a numerical input that is used as an input to the neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed for this tensor during backprop
         :return: The function `get_cass` returns the value of `cass` as a NumPy array.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
         J, cass = self.J_net(z_tensor)
-        return cass.detach().numpy()
+        return cass.detach().cpu().numpy()
 
     def get_L(self, z):
         """
@@ -1415,8 +1564,8 @@ class Particle2DNeural(Particle2DIMR):
         :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. 
         :return: the value of L, which is obtained by passing the input z through the L_net neural network and converting the result to a numpy array.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
-        L = self.L_net(z_tensor).detach().numpy()[0]
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
+        L = self.L_net(z_tensor).detach().cpu().numpy()[0]
         return L
 
     def get_E(self, z):
@@ -1427,8 +1576,8 @@ class Particle2DNeural(Particle2DIMR):
         :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural network. It is converted to a tensor using `torch.tensor` and is set to have a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will
         :return: the value of E, which is the output of the energy_net model when given the input z.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
-        E = self.energy_net(z_tensor).detach().numpy()[0]
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
+        E = self.energy_net(z_tensor).detach().cpu().numpy()[0]
         return E
 
     def m_new(self): #return new r and p
@@ -1634,20 +1783,20 @@ class ShivamoggiNeural(ShivamoggiIMR):
         # Load network
         self.method = method
         if method == "soft":
-            self.energy_net = torch.load(name+'/saved_models/soft_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/soft_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()   
-            self.L_net = torch.load(name+'/saved_models/soft_jacobi_L')
+            self.L_net = torch.load(name+'/saved_models/soft_jacobi_L', weights_only=False)  # changed weights_only=False
             self.L_net.eval()
         elif method == "without":
-            self.energy_net = torch.load(name+'/saved_models/without_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/without_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()   
-            self.L_net = torch.load(name+'/saved_models/without_jacobi_L')
+            self.L_net = torch.load(name+'/saved_models/without_jacobi_L', weights_only=False)  # changed weights_only=False
             self.L_net.eval()
         elif method == "implicit":
             raise Exception("Implicit solver not yet implemented for Shivamoggi.")
-            self.energy_net = torch.load(name+'/saved_models/implicit_jacobi_energy')
+            self.energy_net = torch.load(name+'/saved_models/implicit_jacobi_energy', weights_only=False)  # changed weights_only=False
             self.energy_net.eval()
-            self.J_net = torch.load(name+'/saved_models/implicit_jacobi_J')
+            self.J_net = torch.load(name+'/saved_models/implicit_jacobi_J', weights_only=False)  # changed weights_only=False
             self.J_net.eval()
             def L_net(z):
                 L = -1*torch.tensor([[[0.0, z[2], -z[1]],[-z[2], 0.0, z[0]],[z[1], -z[0], 0.0]]])
@@ -1655,6 +1804,9 @@ class ShivamoggiNeural(ShivamoggiIMR):
             self.L_net = L_net
         else:
             raise Exception("Unkonown method: ", method)
+        self.device = next(self.energy_net.parameters()).device
+        if self.device.type == "cuda":
+            torch.cuda.current_device()
 
     # Get gradient of energy from NN
     def neural_zdot(self, z):
@@ -1665,15 +1817,15 @@ class ShivamoggiNeural(ShivamoggiIMR):
         :param z: The parameter `z` is a tensor representing the input to the neural network. It is of type `torch.Tensor` and has a shape determined by the dimensions of the input data
         :return: The function `neural_zdot` returns the variable `hamiltonian`.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
         En = self.energy_net(z_tensor)
 
         E_z = torch.autograd.grad(En.sum(), z_tensor, only_inputs=True)[0]
         E_z = torch.flatten(E_z)
 
         if self.method == "soft" or self.method == "without":
-            L = self.L_net(z_tensor).detach().numpy()[0]
-            hamiltonian = np.matmul(L, E_z.detach().numpy())
+            L = self.L_net(z_tensor).detach().cpu().numpy()[0]
+            hamiltonian = np.matmul(L, E_z.detach().cpu().numpy())
         else:
             raise Exception("Implicit not implemented for HT yet.")
             J, cass = self.J_net(z_tensor)
@@ -1704,9 +1856,9 @@ class ShivamoggiNeural(ShivamoggiIMR):
         :param z: The parameter `z` is a numerical input that is used as an input to the neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed for this tensor during backprop
         :return: the value of `cass` as a NumPy array.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
         J, cass = self.J_net(z_tensor)
-        return cass.detach().numpy()
+        return cass.detach().cpu().numpy()
 
     def get_L(self, z):
         """
@@ -1716,8 +1868,8 @@ class ShivamoggiNeural(ShivamoggiIMR):
         :param z: The parameter `z` is a numerical input that is used as an input to the `L_net` neural network. It is converted to a tensor using `torch.tensor` with a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will be computed with respect
         :return: the value of L, which is obtained by passing the input z through the L_net neural network and converting the result to a numpy array.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
-        L = self.L_net(z_tensor).detach().numpy()[0]
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
+        L = self.L_net(z_tensor).detach().cpu().numpy()[0]
         return L
 
     def get_E(self, z):
@@ -1728,8 +1880,8 @@ class ShivamoggiNeural(ShivamoggiIMR):
         :param z: The parameter `z` is a numerical input that is used as an input to the `energy_net` neural network. It is converted to a tensor using `torch.tensor` and is set to have a data type of `torch.float32`. The `requires_grad=True` argument indicates that gradients will
         :return: the value of E, which is the output of the energy_net model when given the input z.
         """
-        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True)
-        E = self.energy_net(z_tensor).detach().numpy()[0]
+        z_tensor = torch.tensor(z, dtype=torch.float32, requires_grad=True, device=self.device)
+        E = self.energy_net(z_tensor).detach().cpu().numpy()[0]
         return E
 
     def m_new(self): #return new r and p

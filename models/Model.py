@@ -6,7 +6,7 @@ import torch.nn.functional as F
 # The `EnergyNet` class is a neural network model that takes in input data and outputs a single value,
 # using a specified number of layers and neurons per layer.
 class EnergyNet(nn.Module):
-    def __init__(self, dim, neurons, layers, batch_size):
+    def __init__(self, dim, neurons, layers, batch_size, dropout_rate=0.0, quad_features=False):  # added dropout and quad features parameter
         """
         The function initializes a neural network with a specified number of dimensions, neurons,
         layers, and batch size.
@@ -22,11 +22,19 @@ class EnergyNet(nn.Module):
         self.layers = layers
         self.batch_size = batch_size
 
-        self.inputDense = nn.Linear(dim, neurons)
+        self.quad_features = quad_features  # quadratic features flag
+        self.input_dim = dim + (dim * (dim + 1)) // 2 if quad_features else dim  # input dim suitable for quad features
+
+        self.inputDense = nn.Linear(self.input_dim, neurons)  # using new input dim
         self.hidden = [nn.Linear(neurons, neurons)
                        for i in range(layers-1)]
         self.hidden = nn.ModuleList(self.hidden)
         self.outputDense = nn.Linear(neurons, 1)
+
+        self.dropout = nn.Dropout(dropout_rate)  # defined the dropout module
+
+        if quad_features:
+            self.register_buffer('quad_mask', torch.triu(torch.ones(dim, dim, dtype=torch.bool)))  # precompute upper triangle mask
 
     # x represents our data
     def forward(self, x):
@@ -37,18 +45,32 @@ class EnergyNet(nn.Module):
         :param x: The parameter `x` represents the input to the neural network. It is passed through the input dense layer, followed by a softplus activation function. Then, it is passed through a series of hidden layers, each followed by a softplus activation function. Finally, the output is obtained by passing through the output layer.
         :return: The output of the forward pass through the neural network model.
         """
+        if self.quad_features:  # calculation of quadratic features
+            if x.dim() == 1:  # for 1 dimensional vectors
+                outer_product = torch.outer(x, x)
+                quadratic_features = outer_product[self.quad_mask]
+                x = torch.cat([x, quadratic_features], dim=0)
+            else:
+                x_expanded = x.unsqueeze(2)  # (batch, dim, 1)
+                x_t_expanded = x.unsqueeze(1)  # (batch, 1, dim)
+                outer_product = x_expanded * x_t_expanded  # (batch, dim, dim)
+                quadratic_features = outer_product[:, self.quad_mask]
+                x = torch.cat([x, quadratic_features], dim=1)
+
         x = self.inputDense(x)
         x = F.softplus(x)
+        x = self.dropout(x)  # added dropout
         for i in range(self.layers-1):
             x = self.hidden[i](x)
             x = F.softplus(x)
+            x = self.dropout(x)  # added dropout
         output = self.outputDense(x)
         return output
 
 
 #antisymmetry
 class TensorNet(nn.Module):
-    def __init__(self, dim, neurons, layers, batch_size):
+    def __init__(self, dim, neurons, layers, batch_size, dropout_rate=0.0):  # added dropout parameter
         """
         The function initializes a neural network with a specified number of dimensions, neurons, layers,
         and batch size, and sets up the necessary linear layers and indices for the network.
@@ -81,6 +103,8 @@ class TensorNet(nn.Module):
         self.indices = torch.stack((batch_i, tri_rep[0], tri_rep[1]))
         #print("indices=",self.indices)
 
+        self.dropout = nn.Dropout(dropout_rate)  # defined the dropout module
+
     # x represents our data
     def forward(self, x):
         """
@@ -93,13 +117,15 @@ class TensorNet(nn.Module):
 
         x = self.inputDense(x)
         x = F.softplus(x)
+        x = self.dropout(x)  # added dropout
         for i in range(self.layers-1):
             x = self.hidden[i](x)
             x = F.softplus(x)
+            x = self.dropout(x)  # added dropout
         data = self.outputDense(x)
         b_n = data.size(0) if data.dim() > 1 else 1
         #print("b_n = ", b_n)
-        z = torch.zeros(b_n, self.dim, self.dim)
+        z = torch.zeros(b_n, self.dim, self.dim, device=data.device)
         #print(z)
         #print("ravel=", data.ravel())
         z[self.indices[0, :b_n*self.outputSize], 
@@ -112,7 +138,7 @@ class TensorNet(nn.Module):
         #antisymmetry
 
 class JacVectorNet(nn.Module):
-    def __init__(self, dim, neurons, layers, batch_size):
+    def __init__(self, dim, neurons, layers, batch_size, dropout_rate=0.0):  # added dropout parameter
         """
         The above function is the initialization method for a neural network model called JacVectorNet,
         which takes in parameters for the dimensions, number of neurons, number of layers, and batch size,
@@ -136,6 +162,7 @@ class JacVectorNet(nn.Module):
         self.multiplier = nn.Linear(neurons, 1)
         self.cassimir   = nn.Linear(neurons, 1)
 
+        self.dropout = nn.Dropout(dropout_rate)  # defined the dropout module
 
     # x represents our data
     def forward(self, inp):
@@ -150,9 +177,11 @@ class JacVectorNet(nn.Module):
 
         x = self.inputDense(inp)
         x = F.softplus(x)
+        x = self.dropout(x)  # added dropout
         for i in range(self.layers-1):
             x = self.hidden[i](x)
             x = F.softplus(x)
+            x = self.dropout(x)  # added dropout
         multi = self.multiplier(x)
         cass = self.cassimir(x)
         cass_grad = torch.autograd.grad(torch.sum(cass), inp, only_inputs=True, create_graph=True)[0]
